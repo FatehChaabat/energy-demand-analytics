@@ -1,19 +1,12 @@
 
 #todo Régrission entre puissance et température (06_machine_learning_models.py)
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from statsmodels.graphics.tsaplots import plot_acf
-from scipy.stats import zscore, norm, skew, kurtosis, shapiro
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.ensemble import IsolationForest, RandomForestRegressor
 import os
-from IPython.display import display
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
-
-
+from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.ensemble import RandomForestRegressor
 
 
 #! Chargement, nettoyage et structuration 
@@ -39,13 +32,6 @@ df["num_semaine"] = df["timestamp"].dt.isocalendar().week
 df["week_end"] = df["jour_semaine"].isin([5,6])
 df["energie_kwh"] = df["power_kw"] * 1  
 df["energy_cum_kwh"] = (df.groupby("meter_id")["energie_kwh"].cumsum())
-
-# Séparer les données selon meter_id (si on veut le faire bien-sur)
-df1 = df[df["meter_id"] == 1]
-df2 = df[df["meter_id"] == 2]
-
-
-
 
 
 #! Simulation de la température extérieure
@@ -79,8 +65,6 @@ def simulation_temperature_lag_optimal(df, meter_ids=[1,2]):
     return df
 
 df = simulation_temperature_lag_optimal(df, meter_ids=[1, 2])
-
-
 
 
 #! Régrission linéaire
@@ -137,8 +121,6 @@ def plot_regression_meter_subplot(df, meter_id):
     return
 
 plot_regression_meter_subplot(df, 1)
-
-
 
 
 #!Régression non linéaire avec Random Forest

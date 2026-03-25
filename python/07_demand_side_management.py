@@ -1,19 +1,15 @@
 
 #todo Optimisation DSM (07_demand_side_management.py)
-
-import pandas as pd
+import os
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from statsmodels.graphics.tsaplots import plot_acf
+
 from scipy.stats import zscore, norm, skew, kurtosis, shapiro
+from statsmodels.graphics.tsaplots import plot_acf
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.ensemble import IsolationForest, RandomForestRegressor
-import os
-from IPython.display import display
-
-
-
 
 
 #! Chargement, nettoyage et structuration 
@@ -39,12 +35,6 @@ df["num_semaine"] = df["timestamp"].dt.isocalendar().week
 df["week_end"] = df["jour_semaine"].isin([5,6])
 df["energie_kwh"] = df["power_kw"] * 1  
 df["energy_cum_kwh"] = (df.groupby("meter_id")["energie_kwh"].cumsum())
-
-# Séparer les données selon meter_id (si on veut le faire bien-sur)
-df1 = df[df["meter_id"] == 1]
-df2 = df[df["meter_id"] == 2]
-
-
 
 
 #! Gestion de la demande énergétique (clipping, shift, reduction)
@@ -83,7 +73,6 @@ for col, meter in enumerate(meters):
     axes[1, col].xaxis.set_visible(False)
     axes[1, col].legend(loc="upper right")
     
-
     # REDUCTION
     df_meter["energy_reduced"] = df_meter["energie_kwh"].copy()
     mask_critical = df_meter["heure"].between(17,20)                                                       # définir la plage houraire de réduction
@@ -95,16 +84,12 @@ for col, meter in enumerate(meters):
     axes[2, col].set_xlabel("Time")
     axes[2, col].legend(loc="upper right")
     
-
     # Copier les nouvelles colonnes dans le DataFrame principal
     for c in ["energy_clipped", "energy_shifted", "energy_reduced"]:
         df.loc[df["meter_id"] == meter, c] = df_meter[c].values
 
 plt.tight_layout(h_pad=2)
 plt.show()
-
-
-
 
 #! Énergie totale, facteur de pointe et économie théorique (Clipping / Shift / Reduction)
 # calcul Energie totale, facteur de pointe et l'économie théorique pour chaque cas clip/shift/reduce

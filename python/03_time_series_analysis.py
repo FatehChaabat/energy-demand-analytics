@@ -1,19 +1,11 @@
 
 #todo Analyse des séries temporelles (03_time_series_analysis.py)
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from statsmodels.graphics.tsaplots import plot_acf
-from scipy.stats import zscore, norm, skew, kurtosis, shapiro
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.ensemble import IsolationForest, RandomForestRegressor
 import os
-from IPython.display import display
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
-
-
+from statsmodels.graphics.tsaplots import plot_acf
 
 
 #! Chargement, nettoyage et structuration 
@@ -39,14 +31,6 @@ df["num_semaine"] = df["timestamp"].dt.isocalendar().week
 df["week_end"] = df["jour_semaine"].isin([5,6])
 df["energie_kwh"] = df["power_kw"] * 1  
 df["energy_cum_kwh"] = (df.groupby("meter_id")["energie_kwh"].cumsum())
-
-# Séparer les données selon meter_id (si on veut le faire bien-sur)
-df1 = df[df["meter_id"] == 1]
-df2 = df[df["meter_id"] == 2]
-
-
-
-
 
 
 #! Autocorrélation des séries temporelles
@@ -77,14 +61,14 @@ def plot_acf_meters_subplots(df_list, lags=719):
     plt.tight_layout(h_pad=2)
     #plt.show()
 
+df1 = df[df["meter_id"] == 1].copy()
+df2 = df[df["meter_id"] == 2].copy()
+
 # Exemple tracé en subplots pour les deux compteurs pour 4 jours
 plot_acf_meters_subplots([(df1, "Meter 1"), (df2, "Meter 2")], lags=96)
 
 
-
-
 #! Puissance et rolling mean
-
 def tracer_Rolling_subplots(df_list, fenetres=[3,6,12], colors=["orange","red","darkblue"]):
     """
     Trace la puissance brute et les moyennes glissantes pour plusieurs compteurs en subplots.
@@ -123,8 +107,6 @@ def tracer_Rolling_subplots(df_list, fenetres=[3,6,12], colors=["orange","red","
 
 # Tracé en subplots pour les deux compteurs
 df1_meter, df2_meter = tracer_Rolling_subplots([(df, 1), (df, 2)])
-
-
 
 
 #! Coefficient de Variation (CV)

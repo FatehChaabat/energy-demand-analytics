@@ -1,19 +1,12 @@
 
 #todo Détection d'anomalies (04_anomaly_detection.py)
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from statsmodels.graphics.tsaplots import plot_acf
-from scipy.stats import zscore, norm, skew, kurtosis, shapiro
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.ensemble import IsolationForest, RandomForestRegressor
 import os
-from IPython.display import display
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
-
-
+from scipy.stats import zscore
+from sklearn.ensemble import IsolationForest
 
 
 #! Chargement, nettoyage et structuration 
@@ -40,26 +33,19 @@ df["week_end"] = df["jour_semaine"].isin([5,6])
 df["energie_kwh"] = df["power_kw"] * 1  
 df["energy_cum_kwh"] = (df.groupby("meter_id")["energie_kwh"].cumsum())
 
-# Séparer les données selon meter_id (si on veut le faire bien-sur)
-df1 = df[df["meter_id"] == 1]
-df2 = df[df["meter_id"] == 2]
-
-
-
 
 #! Analyse des anomalies avec des méthodes statistiques (Z-score)
 df["z_score"] = df.groupby("meter_id")["power_kw"].transform(lambda x: zscore(x))
+
 # Une valeur est considérée comme une anomalie si l’absolu du z-score > 2
 df["state_z_score"] = np.where(df["z_score"].abs() > 2, "anomaly", "normal")
 
-# Filtrer anomalies
+# Filtrer les anomalies
 df_anom = df[df["state_z_score"] == "anomaly"]
 
+# tracer les anomalies pour les deux compteurs
 plt.figure(figsize=(12,6))
-
-# Compteur 1 
 plt.scatter(df_anom[df_anom["meter_id"] == 1]["timestamp"], df_anom[df_anom["meter_id"] == 1]["power_kw"], color="blue", marker="X", s=80, label="Meter 1")
-# Compteur 2 
 plt.scatter(df_anom[df_anom["meter_id"] == 2]["timestamp"], df_anom[df_anom["meter_id"] == 2]["power_kw"], color="red", marker="X", s=80, label="Meter 2")
 
 plt.title("Anomaly Detection using Z-score")
@@ -75,8 +61,8 @@ plt.grid(alpha=0.3)
 #plt.show()
 
 
-
 #! Analyse des anomalies avec des méthodes statistiques (Z-robuste ou Z-score robuste)
+#calcul de mediane et MAD
 df["median"] = df.groupby("meter_id")["power_kw"].transform("median")
 df["mad"] = df.groupby("meter_id")["power_kw"].transform(lambda x: np.median(np.abs(x - np.median(x))))
 
@@ -92,7 +78,6 @@ df_anom = df[df["state_z_robust"] == "anomaly"]
 plt.figure(figsize=(12,6))
 plt.scatter(df_anom[df_anom["meter_id"] == 1]["timestamp"], df_anom[df_anom["meter_id"] == 1]["power_kw"], color="blue", marker="X", s=80, label="Meter 1")
 plt.scatter(df_anom[df_anom["meter_id"] == 2]["timestamp"], df_anom[df_anom["meter_id"] == 2]["power_kw"], color="red", marker="X", s=80, label="Meter 2")
-
 plt.title("Anomaly Detection using Z-robuste")
 plt.xlabel("Time")
 plt.ylabel("Power (kW)") 
@@ -103,8 +88,6 @@ plt.xticks(dates, rotation=10)
 plt.legend()
 plt.grid(alpha=0.3)
 #plt.show()
-
-
 
 
 #! Analyse des anomalies avec des méthodes statistiques (IIE avec Rolling mean)
@@ -158,22 +141,19 @@ def plot_IIE_points_subplots(df_list, windows=[3,6,9,12], colors=["gray","orange
 
     plt.tight_layout(h_pad=2)
     #plt.show()
-
     return [df[df["meter_id"] == meter_id].copy() for _, meter_id in df_list]
 
 df1_meter, df2_meter = plot_IIE_points_subplots([(df, 1), (df, 2)])
 
 
-
-
 #! Analyse des anomalies avec Machine Learning (Isolation Forest)
 def tracer_Isol_Forest_subplots(df_list):
     """ 
-    Détection d’anomalies non supervisée (Isolation Forest dans scikit-learn)
+    Détection d'anomalies non supervisée (Isolation Forest dans scikit-learn)
     """
     n_meters = len(df_list)
     fig, axes = plt.subplots(n_meters, 1, figsize=(12, 5*n_meters), sharex=True)
-
+ 
     if n_meters == 1:
         axes = [axes]
 
@@ -194,11 +174,7 @@ def tracer_Isol_Forest_subplots(df_list):
         df_meter.loc[Y.index, "state"] = model.predict(Y)
 
         ax.plot(df_meter["timestamp"], df_meter["power_kw"], color="blue", linestyle='-', markersize = "6", label="Power")
-        ax.scatter(
-            df_meter[df_meter["state"] == -1]["timestamp"],
-            df_meter[df_meter["state"] == -1]["power_kw"],
-            color="red", s=40, label="Outliers"
-        )
+        ax.scatter(df_meter[df_meter["state"] == -1]["timestamp"], df_meter[df_meter["state"] == -1]["power_kw"], color="red", s=40, label="Outliers")
         
         if i == 0: ax.xaxis.set_visible(False)
         ax.legend(prop={'weight': 'bold', 'size': 9})
@@ -209,7 +185,6 @@ def tracer_Isol_Forest_subplots(df_list):
 
     plt.tight_layout(h_pad=2)
     plt.show()
-
     return [df[df["meter_id"] == meter_id].copy() for _, meter_id in df_list]
 
 df1, df2 = tracer_Isol_Forest_subplots([(df, 1), (df, 2)])

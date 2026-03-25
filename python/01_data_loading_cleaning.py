@@ -1,19 +1,8 @@
 
 #todo Chargement et nettoyage des données (01_data_loading_cleaning.py)
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from statsmodels.graphics.tsaplots import plot_acf
-from scipy.stats import zscore, norm, skew, kurtosis, shapiro
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.ensemble import IsolationForest, RandomForestRegressor
 import os
-
-
-
-
+import numpy as np
+import pandas as pd
 
 #! Chargement et conversion
 # Récupère le dossier courant du script
@@ -34,9 +23,6 @@ df["power_kw"] = pd.to_numeric(df["power_kw"], errors="coerce")
 
 # Convertir timestamp, pd.to_datetime() convertit cette colonne en objet datetime que Python peut comprendre comme une date/heure
 df["timestamp"] = pd.to_datetime(df["timestamp"]) 
-
-
-
 
 
 #!  Nettoyage et structuration des données
@@ -72,9 +58,6 @@ df = df.sort_values(["meter_id", "timestamp"], ascending=[True, True])
 df = df.reset_index(drop=True)
 
 
-
-
-
 #! Création de nouvelles colonnes
 # Créer une nouvelle colonne heure dans le DataFrame df (de 0 à 23)
 df["heure"] = df["timestamp"].dt.hour
@@ -98,10 +81,6 @@ df["energie_kwh"] = df["power_kw"] * 1
 # Accumulation de l'energie par heure (on peut faire pareil par jour, semaine, ...)
 df["energy_cum_kwh"] = (df.groupby("meter_id")["energie_kwh"].cumsum())
 
-# Séparer les données selon meter_id (si on veut le faire bien-sur)
-df1 = df[df["meter_id"] == 1]
-df2 = df[df["meter_id"] == 2]
-
 # Test d'affichage des 2 premières lignes
-print("Test d'affichage de 5 premières lignes de DataFrame :")
-print(df.head())
+print("Test d'affichage de 2 premières lignes de DataFrame :")
+print(df.head(2))

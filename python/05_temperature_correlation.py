@@ -1,19 +1,9 @@
 
 #todo Analyse de la corrélation avec la température (05_temperature_correlation.py)
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from statsmodels.graphics.tsaplots import plot_acf
-from scipy.stats import zscore, norm, skew, kurtosis, shapiro
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.ensemble import IsolationForest, RandomForestRegressor
 import os
-from IPython.display import display
-
-
-
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
 
 #! Chargement, nettoyage et structuration 
@@ -39,11 +29,6 @@ df["num_semaine"] = df["timestamp"].dt.isocalendar().week
 df["week_end"] = df["jour_semaine"].isin([5,6])
 df["energie_kwh"] = df["power_kw"] * 1  
 df["energy_cum_kwh"] = (df.groupby("meter_id")["energie_kwh"].cumsum())
-
-# Séparer les données selon meter_id (si on veut le faire bien-sur)
-df1 = df[df["meter_id"] == 1]
-df2 = df[df["meter_id"] == 2]
-
 
 
 #! Simulation de la température extérieure
@@ -85,7 +70,6 @@ def tracer_temperature_lag_complet(df, meter_ids=[1,2]):
         corr_lag0 = df_meter["power_kw"].corr(df_meter["outdoor_temp"])
         print(f"\nRésultats pour le compteur {meter_id} :\nLa correlation pour 'Lag 0' est : {corr_lag0:.3f}")
         
-
         # Corrélation puissance ↔ température 
         corr_lag = [df_meter["power_kw"].corr(df_meter["outdoor_temp"].shift(lag)) for lag in range(24)]
         best_lag = np.argmin(corr_lag)
@@ -112,8 +96,6 @@ def tracer_temperature_lag_complet(df, meter_ids=[1,2]):
 df = tracer_temperature_lag_complet(df, meter_ids=[1, 2])
 
 
-
-
 #! Analyse de la corrélation puissance – température
 def tracer_puissance_temperature_subplots(df_list):
     """
@@ -131,7 +113,6 @@ def tracer_puissance_temperature_subplots(df_list):
         # Corrélation Pearson lag = 0 
         corr = df_meter["power_kw"].corr(df_meter["outdoor_temp"])
         
-
         # Scatter plot lag = 0 
         ax1 = axes[i][0]
         if i == 0: ax1.xaxis.set_visible(False)
@@ -146,7 +127,6 @@ def tracer_puissance_temperature_subplots(df_list):
         best_lag = np.argmin(corr_lag)
         best_corr = corr_lag[best_lag]
         
-
         # Décalage de la température selon le lag optimal 
         temp_shifted = df_meter["outdoor_temp"].shift(best_lag)
         df.loc[df_meter.index, "outdoor_temp_shifted"] = temp_shifted
