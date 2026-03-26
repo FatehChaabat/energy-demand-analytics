@@ -56,7 +56,7 @@ def plot_anomaly_grid(df, meter_ids=[1,2]):
 
         ax.scatter(df_anom["timestamp"], df_anom["power_kw"], color="red", marker="*", s=50, label="Outliers")
 
-        ax.set_title(f"Anomalies Detection using Z-score - Meter {meter_id}", fontsize=10)
+        ax.set_title(f"Anomalies Detection Using Z-score - Meter {meter_id}", fontsize=10)
         ax.set_xlabel("Time", fontsize=10)
         ax.set_ylabel("Power (kW)", fontsize=10)
         if j == 0: ax.set_ylim(30, 460)
@@ -78,7 +78,7 @@ def plot_anomaly_grid(df, meter_ids=[1,2]):
 
         ax.scatter(df_anom["timestamp"], df_anom["power_kw"], color="red", marker="*", s=50, label="Outliers")
 
-        ax.set_title(f"Anomalies Detection using Z-robuste - Meter {meter_id}", fontsize=10)
+        ax.set_title(f"Anomalies Detection Using Z-robuste - Meter {meter_id}", fontsize=10)
         ax.set_xlabel("Time", fontsize=10)
         ax.set_ylabel("Power (kW)", fontsize=10)
         if j == 0: ax.set_ylim(30, 460)
@@ -102,7 +102,7 @@ def plot_anomaly_grid(df, meter_ids=[1,2]):
 
         ax.scatter(df_meter[df_meter["state_if"] == -1]["timestamp"], df_meter[df_meter["state_if"] == -1]["power_kw"], color="red", marker="*", s=50, label="Outliers")
 
-        ax.set_title(f"Anomalies detected with Isolation Forest - Meter {meter_id}", fontsize=10)
+        ax.set_title(f"Anomalies Detection Using Isolation Forest - Meter {meter_id}", fontsize=10)
         ax.set_xlabel("Time", fontsize=10)
         ax.set_ylabel("Power kW", fontsize=10)
         if j == 0: ax.set_ylim(30, 460)
