@@ -143,23 +143,26 @@ energy-demand-analytics/
 
 ```bash
 # Cloner le dépôt
-git clone https://github.com/yourusername/energy-demand-analytics.git
+git clone https://github.com/FatehChaabat/energy-demand-analytics.git
 cd energy-demand-analytics
 
 # Installer les dépendances
 pip install -r requirements.txt
 
-# Exécuter les scripts Python (dans l’ordre)
-python python/01_data_loading_cleaning.py
-python python/02_exploratory_analysis.py
-python python/03_time_series_analysis.py
-python python/04_anomaly_detection.py
-python python/05_temperature_correlation.py
-python python/06_machine_learning_models.py
-python python/07_demand_side_management.py
+# Exécuter les scripts Python dans l’ordre
+python python/01_data_loading_cleaning.py       
+python python/02_exploratory_analysis.py        
+python python/03_time_series_analysis.py        
+python python/04_anomaly_detection.py          
+python python/05_temperature_correlation.py    
+python python/06_machine_learning_models.py     
+python python/07_demand_side_management.py      
 
-# Ou ouvrir le notebook pour l'analyse interactive
+# OU ouvrir le notebook pour une analyse interactive
 jupyter notebook notebooks/energy_analysis_pipeline.ipynb
+
+# OU consulter directement le rapport HTML statique
+reports/energy_analysis_pipeline.html
 ```
 
 ---
