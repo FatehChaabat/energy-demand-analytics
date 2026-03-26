@@ -33,61 +33,90 @@ df["week_end"] = df["jour_semaine"].isin([5,6])
 df["energie_kwh"] = df["power_kw"] * 1  
 df["energy_cum_kwh"] = (df.groupby("meter_id")["energie_kwh"].cumsum())
 
-
-#! Analyse des anomalies avec des méthodes statistiques (Z-score)
-df["z_score"] = df.groupby("meter_id")["power_kw"].transform(lambda x: zscore(x))
-
-# Une valeur est considérée comme une anomalie si l’absolu du z-score > 2
-df["state_z_score"] = np.where(df["z_score"].abs() > 2, "anomaly", "normal")
-
-# Filtrer les anomalies
-df_anom = df[df["state_z_score"] == "anomaly"]
-
-# tracer les anomalies pour les deux compteurs
-plt.figure(figsize=(12,6))
-plt.scatter(df_anom[df_anom["meter_id"] == 1]["timestamp"], df_anom[df_anom["meter_id"] == 1]["power_kw"], color="blue", marker="X", s=80, label="Meter 1")
-plt.scatter(df_anom[df_anom["meter_id"] == 2]["timestamp"], df_anom[df_anom["meter_id"] == 2]["power_kw"], color="red", marker="X", s=80, label="Meter 2")
-
-plt.title("Anomaly Detection using Z-score")
-plt.xlabel("Time")
-plt.ylabel("Power (kW)")
-
-# Afficher toutes les dates de df_anom sur l'axe x
-dates = pd.date_range(df_anom["timestamp"].min().normalize(), df_anom["timestamp"].max().normalize(), freq='D')
-plt.xticks(dates, rotation=10)
-
-plt.legend()
-plt.grid(alpha=0.3)
-#plt.show()
+#! chemin absolu pour enregistrer les graphiques 
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+results_dir = os.path.join(base_dir, "results")
+os.makedirs(results_dir, exist_ok=True)
 
 
-#! Analyse des anomalies avec des méthodes statistiques (Z-robuste ou Z-score robuste)
-#calcul de mediane et MAD
-df["median"] = df.groupby("meter_id")["power_kw"].transform("median")
-df["mad"] = df.groupby("meter_id")["power_kw"].transform(lambda x: np.median(np.abs(x - np.median(x))))
+#! Analyse anomalies par Z-score Z-robuste et Isolation Forest
+def plot_anomaly_grid(df, meter_ids=[1,2]):
 
-# Normalisation avec 1.4826 pour rendre comparable au Z-score (si on suppose une distribution normale)
-df["z_robust"] = (df["power_kw"] - df["median"]) / (1.4826 * df["mad"])
+    fig, axes = plt.subplots(3, 2, figsize=(18, 10), sharex=True)
+    for j, meter_id in enumerate(meter_ids):
 
-# Détection d'anomalies avec seuil = 2 (comme dans Z-score)
-df["state_z_robust"] = np.where(df["z_robust"].abs() > 2, "anomaly", "normal")
+        df_meter = df[df["meter_id"] == meter_id].copy()
 
-# Filtrer anomalies
-df_anom = df[df["state_z_robust"] == "anomaly"]
+        # Z-score (ligne 1)
+        ax = axes[0, j]
 
-plt.figure(figsize=(12,6))
-plt.scatter(df_anom[df_anom["meter_id"] == 1]["timestamp"], df_anom[df_anom["meter_id"] == 1]["power_kw"], color="blue", marker="X", s=80, label="Meter 1")
-plt.scatter(df_anom[df_anom["meter_id"] == 2]["timestamp"], df_anom[df_anom["meter_id"] == 2]["power_kw"], color="red", marker="X", s=80, label="Meter 2")
-plt.title("Anomaly Detection using Z-robuste")
-plt.xlabel("Time")
-plt.ylabel("Power (kW)") 
+        df_meter["z_score"] = zscore(df_meter["power_kw"])
+        df_meter["state_z"] = np.where(df_meter["z_score"].abs() > 2, "anomaly", "normal")
+        df_anom = df_meter[df_meter["state_z"] == "anomaly"]
 
-dates = pd.date_range(df_anom["timestamp"].min().normalize(), df_anom["timestamp"].max().normalize(), freq='D')
-plt.xticks(dates, rotation=10)
+        ax.scatter(df_anom["timestamp"], df_anom["power_kw"], color="red", marker="*", s=50, label="Outliers")
 
-plt.legend()
-plt.grid(alpha=0.3)
-#plt.show()
+        ax.set_title(f"Anomalies Detection using Z-score - Meter {meter_id}", fontsize=10)
+        ax.set_xlabel("Time", fontsize=10)
+        ax.set_ylabel("Power (kW)", fontsize=10)
+        if j == 0: ax.set_ylim(30, 460)
+        else: ax.set_ylim(280, 340)
+        ax.legend(fontsize=8)
+        ax.grid(alpha=0.3)
+        ax.xaxis.set_visible(False)
+        ax.tick_params(axis='y', labelsize=8)
+
+        # Z-robuste (ligne 2)
+        ax = axes[1, j]
+
+        median = df_meter["power_kw"].median()
+        mad = np.median(np.abs(df_meter["power_kw"] - median))
+
+        df_meter["z_robust"] = (df_meter["power_kw"] - median) / (1.4826 * mad)
+        df_meter["state_zr"] = np.where(df_meter["z_robust"].abs() > 2, "anomaly", "normal")
+        df_anom = df_meter[df_meter["state_zr"] == "anomaly"]
+
+        ax.scatter(df_anom["timestamp"], df_anom["power_kw"], color="red", marker="*", s=50, label="Outliers")
+
+        ax.set_title(f"Anomalies Detection using Z-robuste - Meter {meter_id}", fontsize=10)
+        ax.set_xlabel("Time", fontsize=10)
+        ax.set_ylabel("Power (kW)", fontsize=10)
+        if j == 0: ax.set_ylim(30, 460)
+        else: ax.set_ylim(280, 340)
+        ax.legend(fontsize=8)
+        ax.grid(alpha=0.3)
+        ax.xaxis.set_visible(False)
+        ax.tick_params(axis='y', labelsize=8)
+
+        # Isolation Forest (ligne 3)
+        ax = axes[2, j]
+
+        Y = df_meter[["power_kw"]].dropna()
+
+        model = IsolationForest(n_estimators=100, contamination=0.01, random_state=42)
+        model.fit(Y)
+
+        df_meter.loc[Y.index, "state_if"] = model.predict(Y)
+
+        ax.plot(df_meter["timestamp"], df_meter["power_kw"], color="blue", label="Power")
+
+        ax.scatter(df_meter[df_meter["state_if"] == -1]["timestamp"], df_meter[df_meter["state_if"] == -1]["power_kw"], color="red", marker="*", s=50, label="Outliers")
+
+        ax.set_title(f"Anomalies detected with Isolation Forest - Meter {meter_id}", fontsize=10)
+        ax.set_xlabel("Time", fontsize=10)
+        ax.set_ylabel("Power kW", fontsize=10)
+        if j == 0: ax.set_ylim(30, 460)
+        else: ax.set_ylim(280, 340)
+        ax.legend(loc="upper right", fontsize=8)
+        ax.grid(alpha=0.3)
+        ax.tick_params(axis='x', rotation=15, labelsize=8)
+        ax.tick_params(axis='y', labelsize=8)
+
+    plt.tight_layout(h_pad=2)
+    plt.savefig(os.path.join(results_dir, "anomaly_detection.png"), dpi=300, bbox_inches='tight', facecolor='white')
+    #plt.show()
+
+plot_anomaly_grid(df, meter_ids=[1,2])
 
 
 #! Analyse des anomalies avec des méthodes statistiques (IIE avec Rolling mean)
@@ -140,51 +169,8 @@ def plot_IIE_points_subplots(df_list, windows=[3,6,9,12], colors=["gray","orange
         ax.tick_params(axis='x', rotation=10)
 
     plt.tight_layout(h_pad=2)
-    #plt.show()
+    plt.show()
     return [df[df["meter_id"] == meter_id].copy() for _, meter_id in df_list]
 
 df1_meter, df2_meter = plot_IIE_points_subplots([(df, 1), (df, 2)])
 
-
-#! Analyse des anomalies avec Machine Learning (Isolation Forest)
-def tracer_Isol_Forest_subplots(df_list):
-    """ 
-    Détection d'anomalies non supervisée (Isolation Forest dans scikit-learn)
-    """
-    n_meters = len(df_list)
-    fig, axes = plt.subplots(n_meters, 1, figsize=(12, 5*n_meters), sharex=True)
- 
-    if n_meters == 1:
-        axes = [axes]
-
-    for i, (df, meter_id) in enumerate(df_list):
-        ax = axes[i]
-        df_meter = df[df["meter_id"] == meter_id].copy()
-
-        # prend uniquement les valeurs non nulles de la puissance 
-        Y = df_meter[["power_kw"]].dropna()  
-
-        # 100 arbres aléatoires, 1% de valeurs supposées aberrantes, on veut garder toujours le même résultat (random_state=42)
-        model = IsolationForest(n_estimators=100, contamination=0.01, random_state=42)
-
-        # trie les scores, il coupe au seuil correspondant à 1% et les pires 1% deviennent -1
-        model.fit(Y)  
-
-        # applique le model aux données. model.predict(Y) retourne : 1 (normal) ou -1 (anomalie)
-        df_meter.loc[Y.index, "state"] = model.predict(Y)
-
-        ax.plot(df_meter["timestamp"], df_meter["power_kw"], color="blue", linestyle='-', markersize = "6", label="Power")
-        ax.scatter(df_meter[df_meter["state"] == -1]["timestamp"], df_meter[df_meter["state"] == -1]["power_kw"], color="red", s=40, label="Outliers")
-        
-        if i == 0: ax.xaxis.set_visible(False)
-        ax.legend(prop={'weight': 'bold', 'size': 9})
-        ax.set_title(f"Anomalies detected with Isolation Forest - Meter {meter_id}")
-        ax.set_xlabel("Time")
-        ax.set_ylabel("Power kW")
-        ax.tick_params(axis='x', rotation=10)
-
-    plt.tight_layout(h_pad=2)
-    plt.show()
-    return [df[df["meter_id"] == meter_id].copy() for _, meter_id in df_list]
-
-df1, df2 = tracer_Isol_Forest_subplots([(df, 1), (df, 2)])

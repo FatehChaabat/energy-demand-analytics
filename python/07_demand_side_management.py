@@ -36,10 +36,15 @@ df["week_end"] = df["jour_semaine"].isin([5,6])
 df["energie_kwh"] = df["power_kw"] * 1  
 df["energy_cum_kwh"] = (df.groupby("meter_id")["energie_kwh"].cumsum())
 
+#! chemin absolu pour enregistrer les graphiques 
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+results_dir = os.path.join(base_dir, "results")
+os.makedirs(results_dir, exist_ok=True)
+
 
 #! Gestion de la demande énergétique (clipping, shift, reduction)
 meters = df["meter_id"].unique()
-fig, axes = plt.subplots(3, len(meters), figsize=(7*len(meters), 12), sharex=True)
+fig, axes = plt.subplots(3, len(meters), figsize=(6*len(meters), 10), sharex=True)
 
 if len(meters) == 1:
     axes = axes.reshape(3,1)  # s'assurer que axes est 2D
@@ -50,12 +55,13 @@ for col, meter in enumerate(meters):
     # CLIPPING
     p95 = np.percentile(df_meter["energie_kwh"], 95)                                                        # calculer la valeur de l'énergie en dessous de laquelle se trouvent 95 % des valeurs
     df_meter["energy_clipped"] = np.clip(df_meter["energie_kwh"], None, p95)                                # remplacer les valeurs au dessus de P95 par la P95
-    axes[0, col].plot(df_meter["energie_kwh"].values, color="black", label="original")
-    axes[0, col].plot(df_meter["energy_clipped"].values, color="blue", linestyle='--', label="clipping")
-    axes[0, col].set_ylabel("Energy (kWh)")
-    axes[0, col].set_title(f"Meter {meter} - original vs clipping")
+    axes[0, col].plot(df_meter["timestamp"], df_meter["energie_kwh"].values, color="black", label="original")
+    axes[0, col].plot(df_meter["timestamp"],df_meter["energy_clipped"].values, color="blue", linestyle='--', label="clipping")
+    axes[0, col].set_ylabel("Energy (kWh)", fontsize=10)
+    axes[0, col].set_title(f"Meter {meter} - original vs clipping", fontsize=10)
     axes[0, col].xaxis.set_visible(False)
-    axes[0, col].legend(loc="upper right")
+    axes[0, col].legend(loc="upper right", fontsize=8)
+    axes[0, col].tick_params(axis='y', labelsize=8)
 
     # SHIFT
     df_meter["energy_shifted"] = df_meter["energie_kwh"].copy()
@@ -66,30 +72,34 @@ for col, meter in enumerate(meters):
     energy_to_move = shift.sum()                                                                            # somme de l'énergie retirée sur toutes les lignes peak du mois
     n_offpeak = mask_offpeak.sum()                                                                          # nombre total de points mask_offpeak du mois
     df_meter.loc[mask_offpeak, "energy_shifted"] += energy_to_move / n_offpeak                              # ajouter la consommation moyenne (énergie totale reste conservée)
-    axes[1, col].plot(df_meter["energie_kwh"].values, color="black", label="original")
-    axes[1, col].plot(df_meter["energy_shifted"].values, color="#ff7f0e", linestyle='--', label="shift")
-    axes[1, col].set_ylabel("Energy (kWh)")
-    axes[1, col].set_title(f"Meter {meter} - original vs shift")
+    axes[1, col].plot(df_meter["timestamp"], df_meter["energie_kwh"].values, color="black", label="original")
+    axes[1, col].plot(df_meter["timestamp"], df_meter["energy_shifted"].values, color="#ff7f0e", linestyle='--', label="shift")
+    axes[1, col].set_ylabel("Energy (kWh)", fontsize=10)
+    axes[1, col].set_title(f"Meter {meter} - original vs shift", fontsize=10)
     axes[1, col].xaxis.set_visible(False)
-    axes[1, col].legend(loc="upper right")
+    axes[1, col].legend(loc="upper right", fontsize=8)
+    axes[1, col].tick_params(axis='y', labelsize=8)
     
     # REDUCTION
     df_meter["energy_reduced"] = df_meter["energie_kwh"].copy()
     mask_critical = df_meter["heure"].between(17,20)                                                       # définir la plage houraire de réduction
     df_meter.loc[mask_critical, "energy_reduced"] *= 0.9                                                   # réduire de 10% l'énergie dans la plage houraire mask_critical
-    axes[2, col].plot(df_meter["energie_kwh"].values, color="black", label="original")
-    axes[2, col].plot(df_meter["energy_reduced"].values, color="#2ca02c", linestyle='--', label="reduction")
-    axes[2, col].set_ylabel("Energy (kWh)")
-    axes[2, col].set_title(f"Meter {meter} - original vs reduction")
-    axes[2, col].set_xlabel("Time")
-    axes[2, col].legend(loc="upper right")
+    axes[2, col].plot(df_meter["timestamp"], df_meter["energie_kwh"].values, color="black", label="original")
+    axes[2, col].plot(df_meter["timestamp"], df_meter["energy_reduced"].values, color="#2ca02c", linestyle='--', label="reduction")
+    axes[2, col].set_ylabel("Energy (kWh)", fontsize=10)
+    axes[2, col].set_title(f"Meter {meter} - original vs reduction", fontsize=10)
+    axes[2, col].set_xlabel("Time", fontsize=10)
+    axes[2, col].legend(loc="upper right", fontsize=8)
+    axes[2, col].tick_params(axis='x', labelsize=8, rotation=15)
+    axes[2, col].tick_params(axis='y', labelsize=8)
     
     # Copier les nouvelles colonnes dans le DataFrame principal
-    for c in ["energy_clipped", "energy_shifted", "energy_reduced"]:
-        df.loc[df["meter_id"] == meter, c] = df_meter[c].values
+    for c in ["energy_clipped", "energy_shifted", "energy_reduced"]: df.loc[df["meter_id"] == meter, c] = df_meter[c].values
 
-plt.tight_layout(h_pad=2)
+plt.tight_layout(h_pad=3)
+plt.savefig(os.path.join(results_dir, "demand_management.png"), dpi=300, bbox_inches='tight', facecolor='white')
 plt.show()
+
 
 #! Énergie totale, facteur de pointe et économie théorique (Clipping / Shift / Reduction)
 # calcul Energie totale, facteur de pointe et l'économie théorique pour chaque cas clip/shift/reduce

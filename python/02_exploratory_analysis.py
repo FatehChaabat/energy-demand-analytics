@@ -34,6 +34,12 @@ df["energie_kwh"] = df["power_kw"] * 1
 df["energy_cum_kwh"] = (df.groupby("meter_id")["energie_kwh"].cumsum())
 
 
+#! chemin absolu pour enregistrer les graphiques 
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+results_dir = os.path.join(base_dir, "results")
+os.makedirs(results_dir, exist_ok=True)
+
+
 #! Visualisation des profils de puissances horaires  
 plt.figure(figsize=(12,6))
 colors = ['blue','red'] 
@@ -52,11 +58,15 @@ for i, meter in enumerate(df['meter_id'].unique()):
         label=f"Meter {meter}"
     )
 
-plt.xlabel("Time", fontsize=12)
-plt.ylabel("Power (kW)", fontsize=12)
-plt.title("Hourly Power by Day for Each Meter", fontsize=12)
-plt.xticks(rotation=10)
-plt.legend()
+plt.xlabel("Time", fontsize=10)
+plt.ylabel("Power (kW)", fontsize=10)
+plt.title("Raw Power vs Time", fontsize=10)
+plt.xticks(rotation=10, fontsize=8)
+plt.yticks(fontsize=8)
+plt.legend(fontsize=8)
+
+plt.tight_layout()
+plt.savefig(os.path.join(results_dir, "power_timeseries.png"), dpi=300, bbox_inches='tight', facecolor='white')
 #plt.show()
 
 
@@ -171,12 +181,13 @@ def plot_heatmap_subplots(df, meter_ids=None, filtre_values=None, col_filtre="ty
 
         # tracer heatmap
         sns.heatmap(heat, cmap='YlOrRd', linewidths=0.5, annot=False, ax=ax)
-        ax.set_xlabel("Hour")
-        ax.set_ylabel("Day")
+        ax.set_xlabel("Hour", fontsize=10)
+        ax.set_ylabel("Day", fontsize=10)
         #ax.set_title(f"Power Heatmap - Meter {df_type['meter_id'].iloc[0]} ({label_str})")
-        ax.set_title(f"Power Heatmap by Hour and Day - Meter {df_type['meter_id'].iloc[0]}")
+        ax.set_title(f"Power Heatmap by Hour and Day - Meter {df_type['meter_id'].iloc[0]}", fontsize=10)
         ax.invert_yaxis()
-        ax.tick_params(axis='y', rotation=0)
+        ax.tick_params(axis='y', rotation=0, labelsize=8)
+        ax.tick_params(axis='x', labelsize=8)
 
         # cacher l'axe X pour le premier subplot
         if i == 0: ax.xaxis.set_visible(False)
@@ -189,10 +200,11 @@ def plot_heatmap_subplots(df, meter_ids=None, filtre_values=None, col_filtre="ty
         ax.scatter(heures_min+0.5, jours_min+0.5, color='black', marker='x', s=15, label='min')
         ax.scatter(heures_max+0.5, jours_max+0.5, color='blue', marker='o', s=15, label='max')
 
-        ax.legend(loc="upper right")
+        ax.legend(loc="upper right", fontsize=8)
         
 
     plt.tight_layout(h_pad=2)
+    plt.savefig(os.path.join(results_dir, "heatmap_power.png"), dpi=300, bbox_inches='tight', facecolor='white')
     plt.show()
 
     return filtered_dfs

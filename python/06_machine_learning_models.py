@@ -33,6 +33,11 @@ df["week_end"] = df["jour_semaine"].isin([5,6])
 df["energie_kwh"] = df["power_kw"] * 1  
 df["energy_cum_kwh"] = (df.groupby("meter_id")["energie_kwh"].cumsum())
 
+#! chemin absolu pour enregistrer les graphiques 
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+results_dir = os.path.join(base_dir, "results")
+os.makedirs(results_dir, exist_ok=True)
+
 
 #! Simulation de la température extérieure
 def simulation_temperature_lag_optimal(df, meter_ids=[1,2]):
@@ -64,116 +69,77 @@ def simulation_temperature_lag_optimal(df, meter_ids=[1,2]):
 
     return df
 
-df = simulation_temperature_lag_optimal(df, meter_ids=[1, 2])
+simulation_temperature_lag_optimal(df, meter_ids=[1, 2])
 
 
-#! Régrission linéaire
-def plot_regression_meter_subplot(df, meter_id):
-    """
-    Régrission linéaire entre puissance et température (juste pour compteur 1)
-    """
+def plot_regression_and_RF_subplots(df, meter_id):
     df_meter = df[df['meter_id'] == meter_id].copy()
 
-    fig, axes = plt.subplots(2, 1, figsize=(12,10), sharex=True)
+    fig, axes = plt.subplots(2, 2, figsize=(18,10), sharey=True)
 
+    # Calcul du lag optimal et les correlation 
+    corr_lag = [df_meter["power_kw"].corr(df_meter["outdoor_temp"].shift(lag)) for lag in range(24)]
+    corr_lag0 = corr_lag[0]  
+    best_lag = np.argmin(corr_lag)
+    best_corr = corr_lag[best_lag]
+    
     for i, use_shifted in enumerate([False, True]):
-        ax = axes[i]
 
-        # Choix de la colonne température
-        temp_col = 'outdoor_temp_shifted' if use_shifted else 'outdoor_temp'
+        temp_col = 'outdoor_temp' if not use_shifted else 'outdoor_temp_shifted'
 
-        # Supprimer les lignes avec NaN
         df_temp = df_meter.dropna(subset=[temp_col, 'power_kw'])
-
         x = df_temp[temp_col].values
         y = df_temp['power_kw'].values
 
-        # Calcul des coefficients
+        # Régression Linéaire
         coef = np.round(np.polyfit(x, y, 1),1)
         y_pred = coef[0]*x + coef[1]
-
-        # métriques
-        mae = mean_absolute_error(y, y_pred)                 # Erreur absolue moyenne: MAE=​∑ ∣y​ − y_pred|/n; en moyenne le modèle se trompe de .. kW
-        rmse = np.sqrt(mean_squared_error(y, y_pred))        # Erreur quadratique moyenne :pénalise beaucoup plus les grosses erreurs et utile pour détecter les outliers
-
-        # Calcul du corr_lag0 et best_corr pour les mettre dans le titre
-        corr_lag = [df_meter["power_kw"].corr(df_meter["outdoor_temp"].shift(lag)) for lag in range(24)]
-        corr_lag0 = corr_lag[0]  
-        best_lag = np.argmin(corr_lag)
-        best_corr = corr_lag[best_lag]
-        
-        # affichage avec indication si température décalée
-        title = f"Meter {meter_id} ({f'Optimal Lag = {best_lag}h, Corr = {best_corr:.3f}' if use_shifted else f'Lag = 0, Corr = {corr_lag0:.3f}'})"
-        
-        # Plot
-        ax.scatter(x, y, alpha=0.6, label='Actual data', color='blue')
-        if i == 0: ax.xaxis.set_visible(False)
-        ax.plot(x, y_pred, color='red', linewidth=2, label="Regression : " rf"$y = {coef[0]} \cdot x + {coef[1]}$" + "\n" + rf"($\mathrm{{MAE}}={mae:.1f}\ &\ \mathrm{{RMSE}}={rmse:.1f}$)")
-        ax.set_xlabel('Outdoor Temperature (°C)')
-        ax.set_ylabel('Power (kW)')
-        ax.set_title(f'Linear Regression Power vs Temperature - {title}')
-        ax.legend()
-        ax.grid(True)
-
-    plt.tight_layout(h_pad=3)
-    #plt.show()
-
-    return
-
-plot_regression_meter_subplot(df, 1)
-
-
-#!Régression non linéaire avec Random Forest
-def plot_Random_Forest_meter_subplot(df, meter_id):
-    df_meter = df[df['meter_id'] == meter_id].copy()
-
-    fig, axes = plt.subplots(2, 1, figsize=(12,10), sharex=True)
-
-    for i, use_shifted in enumerate([False, True]):
-        ax = axes[i]
-
-        # Choix de la colonne température
-        temp_col = 'outdoor_temp_shifted' if use_shifted else 'outdoor_temp'
-        X = df_meter[[temp_col]].values  
-        y = df_meter['power_kw'].values
-        
-        # Modèle Random Forest
-        model = RandomForestRegressor(n_estimators=100, random_state=42)
-        model.fit(X, y)
-
-        # Prédiction
-        y_pred = model.predict(X)
-
-        # Métriques
         mae = mean_absolute_error(y, y_pred)
         rmse = np.sqrt(mean_squared_error(y, y_pred))
 
-        # Calcul du corr_lag0 et best_corr pour les mettre dans le titre
-        corr_lag = [df_meter["power_kw"].corr(df_meter["outdoor_temp"].shift(lag)) for lag in range(24)]
-        corr_lag0 = corr_lag[0]  
-        best_lag = np.argmin(corr_lag)
-        best_corr = corr_lag[best_lag]
-        
-        # affichage avec indication si température décalée
-        title = f"Meter {meter_id} ({f'Optimal Lag = {best_lag}h, Corr = {best_corr:.3f}' if use_shifted else f'Lag = 0, Corr = {corr_lag0:.3f}'})"
+        title = f"Meter {meter_id} ({f'Lag 0, Corr = {corr_lag0:.2f}' if not use_shifted else f'Optimal Lag = {best_lag}h, Corr = {best_corr:.2f}'})"
 
-        # Tri pour plot propre
-        order = np.argsort(X.flatten())
+        ax_lr = axes[0, i]
+        ax_lr.scatter(x, y, alpha=0.6, color='blue', label='Actual data')
+        ax_lr.plot(x, y_pred, color='red', linewidth=2, label="Regression : "rf"$\mathrm{{P}} = {coef[0]} \cdot \mathrm{{T}} + {coef[1]}$" + "\n" + rf"($\mathrm{{MAE}}={mae:.1f}\ &\ \mathrm{{RMSE}}={rmse:.1f}$)")
+        ax_lr.set_xlabel('Outdoor Temperature (°C)', fontsize=10)
+        ax_lr.set_ylabel('Power (kW)', fontsize=10)
+        ax_lr.set_title(f'Linear Regression - {title}', fontsize=10)
+        ax_lr.legend(fontsize=8)
+        ax_lr.grid(False)
+        if i == 0: ax_lr.xaxis.set_visible(False)
+        if i == 1: ax_lr.xaxis.set_visible(False)
+        if i == 1: ax_lr.yaxis.set_visible(False)
+        ax_lr.tick_params(axis='y', labelsize=8)
 
-        # Plot
-        ax.scatter(X, y, color="blue", alpha=0.6, label="Actual data")
-        if i == 0: ax.xaxis.set_visible(False)
-        ax.plot(X.flatten()[order], y_pred[order], color="red", linewidth=2, label=f"Random Forest\n(MAE={mae:.1f} & RMSE={rmse:.1f})")
-        ax.set_xlabel("Outdoor Temperature (°C)")  
-        ax.set_ylabel("Power (kW)")                
-        ax.set_title(f"Random Forest Power vs Temperature - {title}")  
-        # ax.plot(X.flatten()[order], y_pred[order], label=f"Random Forest\nMAE={mae:.2f} | RMSE={rmse:.2f}")
-        ax.legend()
-        ax.grid(True)
+        # Random Forest
+        X_rf = x.reshape(-1,1)
+        model = RandomForestRegressor(n_estimators=100, random_state=42)
+        model.fit(X_rf, y)
+        y_pred_rf = model.predict(X_rf)
+        mae_rf = mean_absolute_error(y, y_pred_rf)
+        rmse_rf = np.sqrt(mean_squared_error(y, y_pred_rf))
+        order = np.argsort(X_rf.flatten())
 
-    plt.tight_layout(h_pad=3)
+        ax_rf = axes[1, i]
+        ax_rf.scatter(X_rf, y, color='blue', alpha=0.6, label='Actual data')
+        ax_rf.plot(X_rf.flatten()[order], y_pred_rf[order], color='red', linewidth=2, label=f"Random Forest\n(MAE={mae_rf:.1f} & RMSE={rmse_rf:.1f})")
+        if i==0 : ax_rf.set_xlabel('Outdoor Temperature (°C)', fontsize=10)
+        if i==1 : ax_rf.set_xlabel('Outdoor Temperature Shifted by Optimal Lag (°C)', fontsize=10)
+        ax_rf.set_ylabel('Power (kW)', fontsize=10)
+        ax_rf.set_title(f'Random Forest - {title}', fontsize=10)
+        ax_rf.legend(fontsize=8)
+        ax_rf.grid(False)
+        if i == 1: ax_rf.yaxis.set_visible(False)
+        ax_rf.tick_params(axis='x', labelsize=8)
+        ax_rf.tick_params(axis='y', labelsize=8)
+
+    plt.tight_layout(h_pad=3, w_pad=2)
+    plt.savefig(os.path.join(results_dir, "temperature_correlation.png"), dpi=300, bbox_inches='tight', facecolor='white')
     plt.show()
 
-    return
+# Appel pour le compteur 1
+plot_regression_and_RF_subplots(df, 1)
 
-plot_Random_Forest_meter_subplot(df, 1)
+# Appel pour le compteur 2
+#plot_regression_and_RF_subplots(df, 2)
