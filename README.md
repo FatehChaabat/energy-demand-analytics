@@ -63,8 +63,10 @@ class I,J dsm;
 
 ### 🗄️ SQL
 - Génération de données synthétiques
-- Calcul de moyennes, variabilité et facteur de pointe
-- Comparaison semaine vs week-end 
+- Statistiques et variabilité de la puissance (moyenne, max, min, CV, FP)
+- Pics et heures creuses, avec détection d’anomalies (Z_score, Z_robuste)
+- Analyse temporelle et comparaisons journalières pour identifier motifs et irrégularités
+- Comparaison semaine vs week-end : statistiques, énergie cumulée et ratio semaine/week-end
 
 ### 🐍 Python
 - Prétraitement : nettoyage, structuration, gestion des valeurs manquantes, aberrantes et doublons
