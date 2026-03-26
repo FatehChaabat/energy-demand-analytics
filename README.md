@@ -25,6 +25,7 @@ Projet d’analyse et d’optimisation de la consommation énergétique sur 2 co
 
 ## 🧰 Technologies
 **Langages :** SQL, Python   
+
 **Bibliothèques Python :** pandas, numpy, matplotlib, seaborn, scipy, statsmodels, scikit-learn
 
 ---
