@@ -1,36 +1,36 @@
 # Analyse et gestion de la consommation énergétique
 
-Analyse et optimisation de la consommation électrique sur 2 compteurs simulés sur 30 jours. Ce projet montre comment **SQL** et **Python** peuvent détecter des anomalies, analyser les séries temporelles et simuler des stratégies de gestion de la demande énergétique (DSM) dans un contexte industriel ou tertiaire.
+Projet d’analyse et d’optimisation de la consommation énergétique sur 2 compteurs simulés sur 30 jours. Utilisation combinée de **SQL** et **Python** pour détecter anomalies, analyser séries temporelles et simuler des stratégies de gestion de la demande énergétique (DSM) dans un contexte industriel ou tertiaire.
 
 ---
 
 ## 🎯 Objectifs
-- ⚡ Génération de données énergétiques réalistes  
-- 📊 Analyse statistique et exploratoire des séries temporelles  
-- 🚨 Détection des anomalies (statistiques + ML) et identification des heures critiques  
-- 🌡️ Analyse de la température et modélisation puissance–température  
-- 🔧 Optimisation énergétique via DSM (clipping, shifting, reduction)  
+- Génération de données énergétiques réalistes  
+- Analyse statistique et exploratoire des séries temporelles  
+- Détection des anomalies et identification des heures critiques  
+- Corrélation puissance–température et modélisation  
+- Optimisation énergétique via DSM (clipping, load shifting, load reduction)
 
 ---
 
 ## ⚙️ Contexte
-- Données énergétiques simulées : 30 jours, résolution horaire  
-- Profils de consommation :  
-  - 🏢 Compteur 1 : bâtiment tertiaire (HVAC, dynamique)  
-  - 🏭 Compteur 2 : process industriel (charge stable)  
-- Ajout de bruit et pics ponctuels pour tester la détection d’anomalies  
+- Données simulées : 30 jours, résolution horaire  
+- Profils :  
+  - Compteur 1 : bâtiment tertiaire (HVAC, dynamique)  
+  - Compteur 2 : process industriel (charge stable)  
+- Ajout de bruit et pics ponctuels pour tester la détection d'anomalies  
 - Variables : meter_id, timestamp, power_kw
 
 ---
 
 ## 🧰 Technologies
 **Langages :** SQL, Python   
-
 **Bibliothèques Python :** pandas, numpy, matplotlib, seaborn, scipy, statsmodels, scikit-learn
 
 ---
 
-## 🔁 Pipeline du projet
+## 🔁 Pipeline et analyse des données
+### Pipeline du projet
 
 ```mermaid
 flowchart LR
@@ -57,43 +57,22 @@ class C,D,E,F,G python;
 class H ml;
 class I,J dsm;
 ```
----
 
-## 📊 Analyse des données
-
-### 🗄️ SQL
+### Analyse SQL
 - Génération de données synthétiques
 - Statistiques et variabilité de la puissance (moyenne, max, min, CV, FP)
-- Pics et heures creuses, avec détection d’anomalies (Z_score, Z_robuste)
+- Pics et heures creuses, détection des anomalies (Z_score, Z_robuste)
 - Analyse temporelle et comparaisons journalières pour identifier motifs et irrégularités
-- Comparaison semaine vs week-end : statistiques, énergie cumulée et ratio semaine/week-end
+- Comparaison semaine vs week-end : statistiques, énergie cumulée, ratio semaine/week-end
 
-### 🐍 Python
-- Prétraitement : nettoyage, structuration, gestion des valeurs manquantes, aberrantes et doublons
+### Analyse Python
+- Prétraitement : nettoyage, structuration, gestion valeurs manquantes/aberrantes/doublons
 - Visualisations : courbes temporelles, histogrammes, heatmaps
-- Séries temporelles : autocorrélation, Rolling mean, coefficient de variation (CV)
-- Détection d’anomalies : méthodes statistiques (Z-score, Z-robuste, IIE) et apprentissage automatique (Isolation Forest)
-- Analyse température : simulation de la température extérieure, corrélation puissance/température, décalage temporel (lag)
-- Modélisation : régression linéaire et Random Forest
+- Séries temporelles : autocorrélation, Rolling mean, CV
+- Détection d’outliers : Z-score, Z-robuste, IIE, Isolation Forest
+- Analyse température : corrélation puissance/température, décalage temporel (lag)
+- Modélisation : régression linéaire, Random Forest
 - Optimisation DSM : clipping (P95), load shifting, load reduction
-
----
-
-## 📈 Principaux Insights Visuels
-**Séries temporelles :** comparaison des profils horaires de puissance pour les deux compteurs  
-![Power Timeseries](results/power_timeseries.png)  
-
-**Heatmap :** représentation des heatmaps de puissance par heure et par jour pour les deux compteurs, avec mise en évidence des minima et maxima, ainsi que l’identification des cycles journaliers et des pics via l’intensité des couleurs
-![Heatmap](results/heatmap_power.png)  
-
-**Détection d’anomalies :** détection des pics anormaux pour les deux compteurs à l’aide de méthodes statistiques (Z-score, Z-score robuste) et de Machine Learning (Isolation Forest)  
-![Anomalies](results/anomaly_detection.png)  
-
-**Corrélation température :** Modélisation de la corrélation température – puissance pour le compteur 1 à l’aide de la régression linéaire et de Random Forest (pour Lag 0 et Lag optimal)
-![Temp Correlation](results/temperature_correlation.png)  
-
-**Gestion DSM :** Consommation énergétique pour les deux compteurs après l'application du clipping (P95), du load shifting et de la load reduction
-![DSM](results/demand_management.png)   
 
 ---
 
@@ -158,7 +137,7 @@ python python/05_temperature_correlation.py
 python python/06_machine_learning_models.py     
 python python/07_demand_side_management.py      
 
-# OU ouvrir le notebook pour une analyse interactive
+# OU ouvrir le notebook interactif
 jupyter notebook notebooks/energy_analysis_pipeline.ipynb
 
 # OU consulter directement le rapport HTML statique
@@ -169,18 +148,36 @@ reports/energy_analysis_pipeline.html
 
 ## 📈 Résultats clés
 - Identification précise des heures critiques de consommation  
-- Détection d’anomalies par des méthodes statistiques (Z-score, Z-robuste, IIE) et Machine Learning (Isolation Forest)  
+- Détection d’outliers par méthodes statistiques et Machine Learning  
 - Analyse de la corrélation puissance–température et estimation du temps de réponse thermique
-- Modélisation prédictive par régression linéaire et Random Forest pour capturer les comportements linéaires et non linéaires 
-- Quantification des économies et adaptation des stratégies DSM selon des profils dynamiques vs stables 
+- Modélisation prédictive : régression linéaire et Random Forest 
+- Quantification des économies et adaptation des stratégies DSM selon profils dynamiques ou stables
+
+---
+
+## 📈 Principaux Insights Visuels
+**Séries temporelles :** comparaison des profils horaires de puissance entre les deux compteurs  
+![Power Timeseries](results/power_timeseries.png)  
+
+**Heatmap :** visualisation de la puissance par heure et par jour pour les deux compteurs, mettant en évidence minima, maxima, cycles journaliers et pics via l’intensité des couleurs
+![Heatmap](results/heatmap_power.png)  
+
+**Détection d’anomalies :** identification des pics anormaux pour les deux compteurs via méthodes statistiques (Z-score, Z-robuste) et Machine Learning (Isolation Forest)
+![Anomalies](results/anomaly_detection.png)  
+
+**Corrélation température :** modélisation de la relation température–puissance pour le compteur 1 via régression linéaire et Random Forest (Lag 0 et Lag optimal)
+![Temp Correlation](results/temperature_correlation.png)  
+
+**Gestion DSM :** consommation énergétique des deux compteurs après application du clipping (P95), du load shifting et de la load reduction
+![DSM](results/demand_management.png)   
 
 ---
 
 ## 🏭 Applications
-- Monitoring énergétique industriel  
+- Monitoring énergétique industriel et tertiaire
 - Gestion intelligente des bâtiments (HVAC)  
 - Détection d’anomalies sur réseaux électriques  
-- Optimisation de la consommation énergétique    
+- Optimisation de la consommation énergétique
 
 ---
 
@@ -192,4 +189,4 @@ reports/energy_analysis_pipeline.html
 ---
 
 ## 👤 Auteur
-Ingénieur spécialisé en **mécanique des fluides et systèmes énergétiques**, avec un intérêt pour l’analyse de données, la modélisation et l’optimisation énergétique.
+Ingénieur en **mécanique des fluides et systèmes énergétiques**, avec un intérêt pour l’analyse de données, la modélisation et l’optimisation énergétique.
