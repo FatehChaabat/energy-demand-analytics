@@ -619,7 +619,8 @@ C) Analyse avancée :
    5) Potentiel d’optimisation énergétique
    6) Corrélation puissance–température et régression linéaire & Random Forest
 
-CES ANALYSES OUVRENT AINSI LA VOIE À UNE ÉTUDE COMPLÉMENTAIRE SOUS PYTHON AFIN D’APPROFONDIR LES RÉSULTATS ET METTRE EN ŒUVRE DES MODÈLES AVANCÉS.
+CES ANALYSES, RÉALISÉES EN SQL, ONT PERMIS D’EXTRAIRE LES STATISTIQUES CLÉS, D’IDENTIFIER LES HEURES CRITIQUES ET DE DÉTECTER LES IRRÉGULARITÉS, 
+ET OUVRENT AINSI LA VOIE À UNE ÉTUDE COMPLÉMENTAIRE SOUS PYTHON POUR APPROFONDIR LES RÉSULTATS ET METTRE EN ŒUVRE DES MODÈLES AVANCÉS.
 
 */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
