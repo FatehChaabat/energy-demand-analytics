@@ -18,6 +18,3 @@ Thumbs.db
 
 # Résultats (garder ou ignorer selon usage)
 # results/*.png
-
-# Ignorer le HTML généré
-reports/energy_analysis_pipeline.html
