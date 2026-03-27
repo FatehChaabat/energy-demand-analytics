@@ -104,9 +104,6 @@ energy-demand-analytics/
 ├── notebooks/
 │   └── energy_analysis_pipeline.ipynb
 │
-├── reports/
-│   └── energy_analysis_pipeline.html
-│
 ├── results/
 │   ├── 01_power_timeseries.png
 │   ├── 02_heatmap_power.png
@@ -122,6 +119,7 @@ energy-demand-analytics/
 ## ▶️ Comment exécuter
 
 ```bash
+
 # Cloner le dépôt
 git clone https://github.com/FatehChaabat/energy-demand-analytics.git
 cd energy-demand-analytics
@@ -141,8 +139,6 @@ python python/07_demand_side_management.py
 # OU ouvrir le notebook interactif
 jupyter notebook notebooks/energy_analysis_pipeline.ipynb
 
-# OU consulter directement le rapport HTML statique
-reports/energy_analysis_pipeline.html
 ```
 
 ---
