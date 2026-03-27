@@ -116,7 +116,43 @@ energy-demand-analytics/
 │
 └── .gitignore
 ```
-
+```text
+energy-demand-analytics/
+│
+├─ README.md
+├─ requirements.txt
+│
+├─ data/
+│  └─ energy_readings_month.csv
+│
+├─ sql/
+│  ├─ 01_generate_energy_data.sql
+│  └─ 02_energy_analysis.sql
+│
+├─ python/
+│  ├─ 01_data_loading_cleaning.py
+│  ├─ 02_exploratory_analysis.py
+│  ├─ 03_time_series_analysis.py
+│  ├─ 04_anomaly_detection.py
+│  ├─ 05_temperature_correlation.py
+│  ├─ 06_machine_learning_models.py
+│  └─ 07_demand_side_management.py
+│
+├─ notebooks/
+│  └─ energy_analysis_pipeline.ipynb
+│
+├─ reports/
+│  └─ energy_analysis_pipeline.html
+│
+├─ results/
+│  ├─ 01_power_timeseries.png
+│  ├─ 02_heatmap_power.png
+│  ├─ 03_anomaly_detection.png
+│  ├─ 04_temperature_correlation.png
+│  └─ 05_demand_management.png
+│
+└─ .gitignore
+```
 ---
 
 ## ▶️ Comment exécuter
