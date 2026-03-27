@@ -187,3 +187,8 @@ jupyter notebook notebooks/energy_analysis_pipeline.ipynb
 
 ## 👤 Auteur
 Ingénieur en **mécanique des fluides et systèmes énergétiques**, avec un intérêt pour l’analyse de données, la modélisation et l’optimisation énergétique.
+
+---
+
+## 📄 Licence
+Ce projet est sous **MIT License** – vous pouvez librement utiliser, modifier et partager le code et les fichiers, à condition de conserver la mention du copyright et de la licence.
