@@ -158,19 +158,19 @@ reports/energy_analysis_pipeline.html
 
 ## 📈 Principaux Insights Visuels
 **Séries temporelles :** comparaison des profils horaires de puissance entre les deux compteurs  
-![Power Timeseries](results/power_timeseries.png)  
+![Power Timeseries](results/01_power_timeseries.png)  
 
 **Heatmap :** visualisation de la puissance par heure et par jour pour les deux compteurs, mettant en évidence minima, maxima, cycles journaliers et pics via l’intensité des couleurs
-![Heatmap](results/heatmap_power.png)  
+![Heatmap](results/02_heatmap_power.png)  
 
 **Détection d’anomalies :** identification des pics anormaux pour les deux compteurs via méthodes statistiques (Z-score, Z-robuste) et Machine Learning (Isolation Forest)
-![Anomalies](results/anomaly_detection.png)  
+![Anomalies](results/03_anomaly_detection.png)  
 
 **Corrélation température :** modélisation de la relation température–puissance pour le compteur 1 via régression linéaire et Random Forest (Lag 0 et Lag optimal)
-![Temp Correlation](results/temperature_correlation.png)  
+![Temp Correlation](results/04_temperature_correlation.png)  
 
 **Gestion DSM :** consommation énergétique des deux compteurs après application du clipping (P95), du load shifting et de la load reduction
-![DSM](results/demand_management.png)   
+![DSM](results/05_demand_management.png)   
 
 ---
 
