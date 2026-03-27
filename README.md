@@ -108,11 +108,11 @@ energy-demand-analytics/
 │   └── energy_analysis_pipeline.html
 │
 ├── results/
-│   ├── power_timeseries.png
-│   ├── heatmap_power.png
-│   ├── anomaly_detection.png
-│   ├── temperature_correlation.png
-│   └── demand_management.png
+│   ├── 01_power_timeseries.png
+│   ├── 02_heatmap_power.png
+│   ├── 03_anomaly_detection.png
+│   ├── 04_temperature_correlation.png
+│   └── 05_demand_management.png
 │
 └── .gitignore
 ```
