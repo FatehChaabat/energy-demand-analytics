@@ -156,7 +156,7 @@ reports/energy_analysis_pipeline.html
 
 ---
 
-## 📈 Principaux Insights Visuels
+## 📊 Principaux Insights Visuels
 **Séries temporelles :** comparaison des profils horaires de puissance entre les deux compteurs  
 ![Power Timeseries](results/01_power_timeseries.png)  
 
