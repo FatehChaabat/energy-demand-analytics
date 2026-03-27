@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 
+
 #! Chargement et conversion
 # Récupère le dossier courant du script
 base_dir = os.path.dirname(os.path.abspath(__file__))

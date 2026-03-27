@@ -135,7 +135,7 @@ def plot_regression_and_RF_subplots(df, meter_id):
         ax_rf.tick_params(axis='y', labelsize=8)
 
     plt.tight_layout(h_pad=3, w_pad=2)
-    plt.savefig(os.path.join(results_dir, "temperature_correlation.png"), dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig(os.path.join(results_dir, "04_temperature_correlation.png"), dpi=300, bbox_inches='tight', facecolor='white')
     plt.show()
 
 # Appel pour le compteur 1

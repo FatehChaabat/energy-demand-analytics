@@ -66,7 +66,7 @@ plt.yticks(fontsize=8)
 plt.legend(fontsize=8)
 
 plt.tight_layout()
-plt.savefig(os.path.join(results_dir, "power_timeseries.png"), dpi=300, bbox_inches='tight', facecolor='white')
+plt.savefig(os.path.join(results_dir, "01_power_timeseries.png"), dpi=300, bbox_inches='tight', facecolor='white')
 #plt.show()
 
 
@@ -204,7 +204,7 @@ def plot_heatmap_subplots(df, meter_ids=None, filtre_values=None, col_filtre="ty
         
 
     plt.tight_layout(h_pad=2)
-    plt.savefig(os.path.join(results_dir, "heatmap_power.png"), dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig(os.path.join(results_dir, "02_heatmap_power.png"), dpi=300, bbox_inches='tight', facecolor='white')
     plt.show()
 
     return filtered_dfs

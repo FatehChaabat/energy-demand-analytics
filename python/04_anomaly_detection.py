@@ -113,7 +113,7 @@ def plot_anomaly_grid(df, meter_ids=[1,2]):
         ax.tick_params(axis='y', labelsize=8)
 
     plt.tight_layout(h_pad=2)
-    plt.savefig(os.path.join(results_dir, "anomaly_detection.png"), dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig(os.path.join(results_dir, "03_anomaly_detection.png"), dpi=300, bbox_inches='tight', facecolor='white')
     #plt.show()
 
 plot_anomaly_grid(df, meter_ids=[1,2])

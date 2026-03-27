@@ -4,12 +4,6 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
-
-from scipy.stats import zscore, norm, skew, kurtosis, shapiro
-from statsmodels.graphics.tsaplots import plot_acf
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-from sklearn.ensemble import IsolationForest, RandomForestRegressor
 
 
 #! Chargement, nettoyage et structuration 
@@ -97,7 +91,7 @@ for col, meter in enumerate(meters):
     for c in ["energy_clipped", "energy_shifted", "energy_reduced"]: df.loc[df["meter_id"] == meter, c] = df_meter[c].values
 
 plt.tight_layout(h_pad=3)
-plt.savefig(os.path.join(results_dir, "demand_management.png"), dpi=300, bbox_inches='tight', facecolor='white')
+plt.savefig(os.path.join(results_dir, "05_demand_management.png"), dpi=300, bbox_inches='tight', facecolor='white')
 plt.show()
 
 
