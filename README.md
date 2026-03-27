@@ -83,6 +83,7 @@ class I,J dsm;
 energy-demand-analytics/
 │
 ├── README.md
+├── LICENSE
 ├── requirements.txt
 │
 ├── data/
