@@ -1,16 +1,15 @@
 ﻿
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-/*
+/* 
 Points à traiter, avec comparaison entre les deux compteurs :
-   1) Calcul des statistiques journalières et horaires de la puissance : moyenne, maximum, minimum, écart-type et coefficient de variation
-   2) Calcul du cumul énergétique (énergie cumulée journalière et hebdomadaireet) et comparaison avec la dernière consommation (en kWh et en %)
-   3) Pics et heures creuses de consommation (Heures de pointe : 3 pics journaliers, moyenne et classement mensuel; Heures creuses : 6 creux journaliers, 
-   moyenne et classement mensuel)
-   4) Calcul d'anomalies par Z_score Z_robuste (puissances horaires et journalières)
-   5) Etude de la stabilité (Facteur de Pointe), Variabilités (Coefficient de Variation) et Puissance contractuelle (par rapport au P99)
-   6) Comparaison statistiques semaine vs weekend (Moyenne sur l'ensemble de données, Calcul de FP et CV, Énergie cumulée, ratio semaine / week-end)
-   7) Analyse temporelle et variabilité journalière (Calcul des indicateurs FP et CV pour les heures creuses, pleines et critiques & Comparaison des jours 
-   consécutifs pour détecter répétitions, motifs et anomalies)
+   1) Nettoyage des données : suppression des valeurs manquantes (NAN), des puissances aberrantes (<0) et des doublons sur (meter_id, timestamp)
+   2) Calcul des statistiques journalières et horaires de la puissance : moyenne, maximum, minimum, écart-type et coefficient de variation
+   3) Calcul du cumul énergétique (énergie cumulée journalière et hebdomadaireet) et comparaison avec la dernière consommation (en kWh et en %)
+   4) Pics et heures creuses de consommation (Heures de pointe : 3 pics journaliers, moyenne et classement mensuel; Heures creuses : 6 creux journaliers, moyenne et classement mensuel)
+   5) Calcul d'anomalies par Z_score Z_robuste (puissances horaires et journalières)
+   6) Etude de la stabilité (Facteur de Pointe), Variabilités (Coefficient de Variation) et Puissance contractuelle (par rapport au P99)
+   7) Comparaison statistiques semaine vs weekend (Moyenne sur l'ensemble de données, Calcul de FP et CV, Énergie cumulée, ratio semaine / week-end)
+   8) Analyse temporelle et variabilité journalière (Calcul des indicateurs FP et CV pour les heures creuses, pleines et critiques & Comparaison des jours consécutifs pour détecter répétitions, motifs et anomalies)
 */
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -19,7 +18,76 @@ Points à traiter, avec comparaison entre les deux compteurs :
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ 
--- 1) Calcul des statistiques de la puissance : moyenne, maximum, minimum, écart-type et coefficient de variation
+-- 1) Nettoyage général : NAN, valeurs aberrantes et doublons
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+--========== Détection des valeurs NAN et aberrantes (puissance négative) ==========--
+SELECT *  
+FROM Energy_Readings_month
+WHERE meter_id IS NULL OR timestamp IS NULL OR power_kw < 00 
+ORDER BY meter_id, timestamp;
+
+-- Suppression des valeurs NAN et aberrantes
+DELETE FROM Energy_Readings_month
+WHERE meter_id IS NULL OR timestamp IS NULL OR power_kw <0;
+
+
+--========== Détection de doublons ==========--
+
+-- Méthode 1 : GROUP BY et COUNT() 
+SELECT
+meter_id,
+timestamp,
+COUNT(*) AS doublons
+FROM Energy_Readings_month
+GROUP BY meter_id, timestamp
+HAVING COUNT(meter_id) > 1;
+
+-- Méthode 2 : CTE pour lister les doublons exacts
+;WITH doublons AS (
+SELECT meter_id, timestamp
+FROM Energy_Readings_month
+GROUP BY meter_id, timestamp
+HAVING COUNT(*) > 1
+)
+SELECT e.*
+FROM Energy_Readings_month e
+JOIN doublons d 
+ON e.meter_id = d.meter_id
+and e.timestamp = d.timestamp
+ORDER BY e.meter_id;
+
+-- Méthode 3 : Window Function pour compter les doublons
+SELECT *
+FROM (
+SELECT *, COUNT(*) OVER (PARTITION BY meter_id, timestamp) AS doublons
+FROM Energy_Readings_month
+) t
+WHERE doublons > 1;
+
+-- Suppression des doublons en gardant la première occurrence
+;WITH doublons AS (
+SELECT *, ROW_NUMBER() OVER (PARTITION BY meter_id, timestamp ORDER BY meter_id) AS rw
+FROM Energy_Readings_month
+)
+DELETE e
+FROM Energy_Readings_month e
+JOIN doublons d
+  ON e.meter_id = d.meter_id
+ AND e.timestamp = d.timestamp
+WHERE d.rw > 1;
+
+-- Vérification finale
+SELECT *
+FROM Energy_Readings_month
+ORDER BY meter_id, timestamp;
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ 
+-- 2) Calcul des statistiques de la puissance : moyenne, maximum, minimum, écart-type et coefficient de variation
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -56,7 +124,7 @@ GO
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- 2) Calcul du cumul énergétique et comparaison avec la dernière consommation (en kWh et en %)
+-- 3) Calcul du cumul énergétique et comparaison avec la dernière consommation (en kWh et en %)
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -122,7 +190,7 @@ GO
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- 3) Pics et heures creuses de consommation
+-- 4) Pics et heures creuses de consommation
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -194,7 +262,7 @@ GO
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- 4) Calcul d'anomalies par Z_score (puissance - µ)/σ), puis par Z_robuste (puissance - mediane)/(1.4826 * MAD)
+-- 5) Calcul d'anomalies par Z_score (puissance - µ)/σ), puis par Z_robuste (puissance - mediane)/(1.4826 * MAD)
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -367,7 +435,7 @@ ORDER BY meter_id, jour;
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- 5) Stabilité (Facteur de Pointe), Variabilités (Coefficient de Variation) et Puissance contractuelle (par rapport au P99)
+-- 6) Stabilité (Facteur de Pointe), Variabilités (Coefficient de Variation) et Puissance contractuelle (par rapport au P99)
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /*
 - Stabilité : FP proche de 1 → profil plat et stable, FP élevé → profil dynamique
@@ -419,7 +487,7 @@ GO
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- 6) Comparaison statistiques semaine vs weekend 
+-- 7) Comparaison statistiques semaine vs weekend 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -528,7 +596,7 @@ ORDER BY meter_id;                 -- Résulatts : activité dominante en semain
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
--- 7) Analyse temporelle et variabilité journalière
+-- 8) Analyse temporelle et variabilité journalière
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -594,15 +662,14 @@ GO
 /*
 
 A) Choses traitées tout en comparant entre les deux compteurs :
-   1) Calcul des statistiques journalières et horaires de la puissance : moyenne, maximum, minimum, écart-type et coefficient de variation
-   2) Calcul du cumul énergétique (énergie cumulée journalière et hebdomadaireet) et comparaison avec la dernière consommation (en kWh et en %)
-   3) Pics et heures creuses de consommation (Heures de pointe : 3 pics journaliers, moyenne et classement mensuel; Heures creuses : 6 creux journaliers, moyenne et 
-   classement mensuel)
-   4) Calcul d'anomalies par Z_score Z_robuste (puissances horaires et journalières)
-   5) Etude de la stabilité (Facteur de Pointe), Variabilités (Coefficient de Variation) et Puissance contractuelle (par rapport au P99)
-   6) Comparaison statistiques semaine vs weekend (Moyenne sur l'ensemble de données, Calcul de FP et CV, Énergie cumulée, ratio semaine / week-end)
-   7) Analyse temporelle et variabilité journalière (Calcul des indicateurs FP et CV pour les heures creuses, pleines et critiques & Comparaison des jours consécutifs 
-   pour détecter répétitions, motifs et anomalies)
+   1) Nettoyage des données : suppression des valeurs manquantes (NAN), des puissances aberrantes (<0) et des doublons sur (meter_id, timestamp)
+   2) Calcul des statistiques journalières et horaires de la puissance : moyenne, maximum, minimum, écart-type et coefficient de variation
+   3) Calcul du cumul énergétique (énergie cumulée journalière et hebdomadaireet) et comparaison avec la dernière consommation (en kWh et en %)
+   4) Pics et heures creuses de consommation (Heures de pointe : 3 pics journaliers, moyenne et classement mensuel; Heures creuses : 6 creux journaliers, moyenne et classement mensuel)
+   5) Calcul d'anomalies par Z_score Z_robuste (puissances horaires et journalières)
+   6) Etude de la stabilité (Facteur de Pointe), Variabilités (Coefficient de Variation) et Puissance contractuelle (par rapport au P99)
+   7) Comparaison statistiques semaine vs weekend (Moyenne sur l'ensemble de données, Calcul de FP et CV, Énergie cumulée, ratio semaine / week-end)
+   8) Analyse temporelle et variabilité journalière (Calcul des indicateurs FP et CV pour les heures creuses, pleines et critiques & Comparaison des jours consécutifs pour détecter répétitions, motifs et anomalies)
 
 B) Analyse métier (pas juste statistique) :
    1) Est-ce que le compteur 1 est correctement dimensionné ?
