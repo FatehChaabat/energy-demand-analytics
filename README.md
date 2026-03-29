@@ -61,6 +61,7 @@ class I,J dsm;
 
 ### Analyse SQL
 - Génération de données synthétiques
+- Nettoyage des données : suppression des valeurs nulles, aberrantes et des doublons
 - Statistiques et variabilité de la puissance (moyenne, max, min, CV, FP)
 - Pics et heures creuses, détection des anomalies (Z_score, Z_robuste)
 - Analyse temporelle et comparaisons journalières pour identifier motifs et irrégularités
