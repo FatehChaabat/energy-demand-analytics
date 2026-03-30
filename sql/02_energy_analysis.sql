@@ -2,7 +2,7 @@
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /* 
 Points à traiter, avec comparaison entre les deux compteurs :
-   1) Nettoyage des données : suppression des valeurs manquantes (NAN), des puissances aberrantes (<0) et des doublons sur (meter_id, timestamp)
+   1) Nettoyage des données : suppression des valeurs manquantes (NULL), des puissances aberrantes (<0) et des doublons sur (meter_id, timestamp)
    2) Calcul des statistiques journalières et horaires de la puissance : moyenne, maximum, minimum, écart-type et coefficient de variation
    3) Calcul du cumul énergétique (énergie cumulée journalière et hebdomadaireet) et comparaison avec la dernière consommation (en kWh et en %)
    4) Pics et heures creuses de consommation (Heures de pointe : 3 pics journaliers, moyenne et classement mensuel; Heures creuses : 6 creux journaliers, moyenne et classement mensuel)
@@ -18,17 +18,18 @@ Points à traiter, avec comparaison entre les deux compteurs :
 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ 
--- 1) Nettoyage général : NAN, valeurs aberrantes et doublons
+-- 1) Nettoyage général : valeurs manquantes, aberrantes et doublons
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
---========== Détection des valeurs NAN et aberrantes (puissance négative) ==========--
+--========== Détection des valeurs manquantes et aberrantes ==========--
 SELECT *  
 FROM Energy_Readings_month
-WHERE meter_id IS NULL OR timestamp IS NULL OR power_kw < 00 
+WHERE meter_id IS NULL OR timestamp IS NULL OR power_kw IS NULL   -- détecte les valeurs manquantes (NULL)
+      OR power_kw < 0                                             -- détecte les valeurs aberrantes (Puissance négative)
 ORDER BY meter_id, timestamp;
 
--- Suppression des valeurs NAN et aberrantes
+-- Suppression des valeurs manquantes et aberrantes
 DELETE FROM Energy_Readings_month
 WHERE meter_id IS NULL OR timestamp IS NULL OR power_kw <0;
 
@@ -662,7 +663,7 @@ GO
 /*
 
 A) Choses traitées tout en comparant entre les deux compteurs :
-   1) Nettoyage des données : suppression des valeurs manquantes (NAN), des puissances aberrantes (<0) et des doublons sur (meter_id, timestamp)
+   1) Nettoyage des données : suppression des valeurs manquantes (NULL), des puissances aberrantes (<0) et des doublons sur (meter_id, timestamp)
    2) Calcul des statistiques journalières et horaires de la puissance : moyenne, maximum, minimum, écart-type et coefficient de variation
    3) Calcul du cumul énergétique (énergie cumulée journalière et hebdomadaireet) et comparaison avec la dernière consommation (en kWh et en %)
    4) Pics et heures creuses de consommation (Heures de pointe : 3 pics journaliers, moyenne et classement mensuel; Heures creuses : 6 creux journaliers, moyenne et classement mensuel)
