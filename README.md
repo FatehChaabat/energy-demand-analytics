@@ -2,14 +2,25 @@
 
 Projet d’analyse et d’optimisation de la consommation énergétique sur 2 compteurs simulés sur 30 jours. Utilisation combinée de **SQL** et **Python** pour détecter anomalies, analyser séries temporelles et simuler des stratégies de gestion de la demande énergétique (DSM) dans un contexte industriel ou tertiaire.
 
+![Python](https://img.shields.io/badge/Python-3.10-blue)
+![Microsoft SQL Server](https://img.shields.io/badge/Microsoft%20SQL%20Server-Developer-red?logo=microsoft-sql-server)
+![License](https://img.shields.io/badge/License-MIT-green)
+
 ---
 
 ## 🎯 Objectifs
 - Génération de données énergétiques réalistes  
 - Analyse statistique et exploratoire des séries temporelles  
 - Détection des anomalies et identification des heures critiques  
-- Corrélation puissance–température et modélisation  
+- Corrélation puissance–température et modélisation prédictive (régression linéaire et Random Forest)
 - Optimisation énergétique via DSM (clipping, load shifting, load reduction)
+
+---
+
+## 💡 Valeur métier
+- Réduction des pics de consommation → baisse des coûts énergétiques
+- Détection proactive des anomalies → maintenance préventive
+- Optimisation des charges → amélioration de l’efficacité énergétique
 
 ---
 
@@ -24,8 +35,6 @@ Projet d’analyse et d’optimisation de la consommation énergétique sur 2 co
 ---
 
 ## 🧰 Technologies
-**Langages :** SQL, Python   
-
 **Bibliothèques Python :** pandas, numpy, matplotlib, seaborn, scipy, statsmodels, scikit-learn
 
 ---
@@ -60,15 +69,14 @@ class I,J dsm;
 ```
 
 ### Analyse SQL
-- Génération de données synthétiques
-- Nettoyage des données : suppression des valeurs nulles, aberrantes et des doublons
-- Statistiques et variabilité de la puissance (moyenne, max, min, CV, FP)
-- Pics et heures creuses, détection des anomalies (Z_score, Z_robuste)
+- Génération de données synthétiques et première passe de nettoyage : valeurs nulles, aberrantes, doublons
+- Statistiques et variabilité de la puissance : moyenne, max, min, CV, FP
+- Pics et heures creuses, détection des anomalies : Z_score, Z_robuste
 - Analyse temporelle et comparaisons journalières pour identifier motifs et irrégularités
 - Comparaison semaine vs week-end : statistiques, énergie cumulée, ratio semaine/week-end
 
 ### Analyse Python
-- Prétraitement : nettoyage, structuration, gestion valeurs manquantes/aberrantes/doublons
+- Prétraitement : nettoyage approfondi, structuration, gestion de valeurs manquantes/aberrantes/doublons
 - Visualisations : courbes temporelles, histogrammes, heatmaps
 - Séries temporelles : autocorrélation, Rolling mean, CV
 - Détection d’outliers : Z-score, Z-robuste, IIE, Isolation Forest
@@ -151,6 +159,11 @@ jupyter notebook notebooks/energy_analysis_pipeline.ipynb
 - Analyse de la corrélation puissance–température et estimation du temps de réponse thermique
 - Modélisation prédictive : régression linéaire et Random Forest 
 - Quantification des économies et adaptation des stratégies DSM selon profils dynamiques ou stables
+
+### Points clés
+- Les profils tertiaires présentent une forte dépendance thermique
+- Les anomalies sont détectables efficacement via méthodes hybrides
+- Les stratégies DSM permettent de réduire les pics sans impacter la demande globale
 
 ---
 
