@@ -85,7 +85,7 @@ def run(df, results_dir):
             ax.tick_params(axis='y', labelsize=8)
          
         plt.tight_layout(h_pad=2)
-        plt.savefig(os.path.join(results_dir, "03_anomaly_detection.png"), dpi=300, bbox_inches='tight', facecolor='white')
+        plt.savefig(os.path.join(results_dir, "07_anomaly_detection.png"), dpi=300, bbox_inches='tight', facecolor='white')
         #plt.show()
 
         # --- Tableau récapitulatif ---
@@ -101,7 +101,7 @@ def run(df, results_dir):
 
 
     #! Analyse des anomalies avec des méthodes statistiques (IIE avec Rolling mean)
-    def plot_IIE_points_subplots(df_list, windows=[3,6,9,12], colors=["gray","orange","red","darkblue"]):
+    def plot_EII_points_subplots(df_list, windows=[3,6,9,12], colors=["gray","orange","red","darkblue"]):
         """
         Trace les points IIE pour plusieurs compteurs en subplots.
         df_list : liste de tuples (DataFrame, meter_id)
@@ -121,37 +121,38 @@ def run(df, results_dir):
                 df_meter[f"std_{w}h"] = df_meter["power_kw"].rolling(w).std()
                 df_meter[f"cv_{w}h"] = df_meter[f"std_{w}h"] / df_meter[f"mw_{w}h"]
                 
-                # IIE
+                # EII
                 median_cv = df_meter[f"cv_{w}h"].median()
                 mad_cv = (df_meter[f"cv_{w}h"] - median_cv).abs().median()
                 mad_cv = mad_cv if mad_cv != 0 else 1e-6
-                df_meter[f"IIE_{w}h"] = (df_meter[f"cv_{w}h"] - median_cv) / (1.4826 * mad_cv)
+                df_meter[f"EII_{w}h"] = (df_meter[f"cv_{w}h"] - median_cv) / (1.4826 * mad_cv)
 
                 # Points instables
-                df_moderate = df_meter[(df_meter[f"IIE_{w}h"] > 2) & (df_meter[f"IIE_{w}h"] <= 3)]
-                df_strong = df_meter[df_meter[f"IIE_{w}h"] > 3]
+                df_moderate = df_meter[(df_meter[f"EII_{w}h"] > 2) & (df_meter[f"EII_{w}h"] <= 3)]
+                df_strong = df_meter[df_meter[f"EII_{w}h"] > 3]
                 
                 # Scatter plot
-                ax.scatter(df_moderate["timestamp"], df_moderate[f"IIE_{w}h"],
+                ax.scatter(df_moderate["timestamp"], df_moderate[f"EII_{w}h"],
                         color=colors[j], label=f"{w}h >2 (moderate)", marker="o", s=80)
-                ax.scatter(df_strong["timestamp"], df_strong[f"IIE_{w}h"],
+                ax.scatter(df_strong["timestamp"], df_strong[f"EII_{w}h"],
                         color=colors[j], label=f"{w}h >3 (strong)", marker="X", s=100)
             
             # Lignes de seuil
-            ax.axhline(2, color="black", linestyle="--", label="IIE=2 (moderate)", linewidth=2)
-            ax.axhline(3, color="black", linestyle="-.", label="IIE=3 (strong)", linewidth=2)
+            ax.axhline(2, color="black", linestyle="--", label="EII=2 (moderate)", linewidth=2)
+            ax.axhline(3, color="black", linestyle="-.", label="EII=3 (strong)", linewidth=2)
 
             if i == 0: ax.xaxis.set_visible(False)
             ax.set_xlabel("Time")
-            ax.set_ylabel("IIE")
+            ax.set_ylabel("EII")
             ax.set_title(f"Energy Instability Index - Meter {meter_id}")
             ax.legend()
             ax.grid(alpha=0.3)
             ax.tick_params(axis='x', rotation=10)
 
         plt.tight_layout(h_pad=2)
+        plt.savefig(os.path.join(results_dir, "08_energy_instability_index.png"), dpi=300, bbox_inches='tight', facecolor='white')
         # plt.show()
         return [df[df["meter_id"] == meter_id].copy() for _, meter_id in df_list]
 
-    df1_meter, df2_meter = plot_IIE_points_subplots([(df, 1), (df, 2)])
+    df1_meter, df2_meter = plot_EII_points_subplots([(df, 1), (df, 2)])
 

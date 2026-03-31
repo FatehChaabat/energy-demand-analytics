@@ -61,7 +61,7 @@ def run(df, results_dir):
         for c in ["energy_clipped", "energy_shifted", "energy_reduced"]: df.loc[df["meter_id"] == meter, c] = df_meter[c].values
 
     plt.tight_layout(h_pad=3)
-    plt.savefig(os.path.join(results_dir, "05_demand_management.png"), dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig(os.path.join(results_dir, "12_demand_side_management.png"), dpi=300, bbox_inches='tight', facecolor='white')
     
 
 
@@ -102,4 +102,4 @@ def run(df, results_dir):
         print(f"\nRésultats pour compteur {meter} :")
         print(df_results.round(2).to_string(index=False))
 
-    plt.show()
+    #plt.show()

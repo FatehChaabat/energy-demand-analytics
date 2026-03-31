@@ -77,6 +77,7 @@ def run(df, results_dir):
             ax.legend(prop={'weight': 'bold', 'size': 9})
             ax.grid(True)
         plt.tight_layout(h_pad=3)  # h_pad augmente l'espacement vertical
+        plt.savefig(os.path.join(results_dir, "02_power_distribution.png"), dpi=300, bbox_inches='tight', facecolor='white')
         #plt.show()
 
     plot_distribution_subplots_indep(df, meter_ids=[1,2])
@@ -172,7 +173,7 @@ def run(df, results_dir):
             
 
         plt.tight_layout(h_pad=2)
-        plt.savefig(os.path.join(results_dir, "02_heatmap_power.png"), dpi=300, bbox_inches='tight', facecolor='white')
+        plt.savefig(os.path.join(results_dir, "03_heatmap_power.png"), dpi=300, bbox_inches='tight', facecolor='white')
         # plt.show()
 
         return filtered_dfs

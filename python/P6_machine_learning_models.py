@@ -7,39 +7,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.ensemble import RandomForestRegressor
 
 def run(df, results_dir):
-    #! Simulation de la température extérieure
-    def simulation_temperature_lag_optimal(df, meter_ids=[1,2]):
-        """
-        Simulation de la température extérieure et calcul du lag optimal pour chaque compteur.
-        """
-        for meter_id in meter_ids:
-            df_meter = df[df["meter_id"] == meter_id].copy()
-
-            # Simulation température
-            n = len(df_meter)
-            t = np.arange(n)
-            temp_mean = 5
-            temp_amp = 10
-            phase = -2 * np.pi * 15 / 24
-            temp = temp_mean + temp_amp * np.sin(2 * np.pi * t / 24 + phase)
-            df_meter["outdoor_temp"] = temp
-            df.loc[df_meter.index, "outdoor_temp"] = temp
-
-            # Corrélation pour tous les lags 0-23
-            corr_lag = [df_meter["power_kw"].corr(df_meter["outdoor_temp"].shift(lag)) for lag in range(24)]
-            best_lag = np.argmin(corr_lag)
-            best_corr = corr_lag[best_lag]
-            print(f"Compteur {meter_id} : Optimal Lag = {best_lag}h, Corr = {best_corr:.3f}")
-
-            # Décalage de la température selon le lag optimal 
-            temp_shifted = df_meter["outdoor_temp"].shift(best_lag)
-            df.loc[df_meter.index, "outdoor_temp_shifted"] = temp_shifted
-
-        return df
-
-    simulation_temperature_lag_optimal(df, meter_ids=[1, 2])
-
-
+    #! regression linéaire vs random forest (lag optimal)
     def plot_regression_and_RF_subplots(df, meter_id):
         df_meter = df[df['meter_id'] == meter_id].copy()
 
@@ -103,7 +71,7 @@ def run(df, results_dir):
             ax_rf.tick_params(axis='y', labelsize=8)
 
         plt.tight_layout(h_pad=3, w_pad=2)
-        plt.savefig(os.path.join(results_dir, "04_temperature_correlation.png"), dpi=300, bbox_inches='tight', facecolor='white')
+        plt.savefig(os.path.join(results_dir, "11_linear_regression_vs_random_forest.png"), dpi=300, bbox_inches='tight', facecolor='white')
         # plt.show()
 
     # Appel pour le compteur 1

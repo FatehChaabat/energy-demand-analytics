@@ -1,9 +1,10 @@
 
 #todo Analyse de la corrélation avec la température (P5_temperature_correlation.py)
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-def run(df):
+def run(df, results_dir):
     #! Simulation de la température extérieure
     def tracer_temperature_lag_complet(df, meter_ids=[1,2]):
         """
@@ -63,6 +64,7 @@ def run(df):
             ax_corr.legend(loc="upper left")
 
         plt.tight_layout(h_pad=2)
+        plt.savefig(os.path.join(results_dir, "09_power-temperature_correlation.png"), dpi=300, bbox_inches='tight', facecolor='white')
         #plt.show()
         return df
 
@@ -114,6 +116,7 @@ def run(df):
             ax2.grid(True)
 
         plt.tight_layout(h_pad=2)
+        plt.savefig(os.path.join(results_dir, "10_power_vs_temperature_lag.png"), dpi=300, bbox_inches='tight', facecolor='white')
         # plt.show()
 
         return [df[df["meter_id"] == meter_id].copy() for _, meter_id in df_list]

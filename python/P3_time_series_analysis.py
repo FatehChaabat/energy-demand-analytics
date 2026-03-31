@@ -1,9 +1,10 @@
 
 #todo Analyse des séries temporelles (P3_time_series_analysis.py)
+import os
 import matplotlib.pyplot as plt
 from statsmodels.graphics.tsaplots import plot_acf
 
-def run(df):
+def run(df, results_dir):
     #! Autocorrélation des séries temporelles
     def plot_acf_meters_subplots(df_list, lags=719):
         """
@@ -30,6 +31,7 @@ def run(df):
             ax.set_ylabel("Autocorrelation", fontsize=12)
 
         plt.tight_layout(h_pad=2)
+        plt.savefig(os.path.join(results_dir, "04_power_autocorrelation.png"), dpi=300, bbox_inches='tight', facecolor='white')
         #plt.show()
 
     df1 = df[df["meter_id"] == 1].copy()
@@ -71,6 +73,7 @@ def run(df):
             ax.tick_params(axis='x', rotation=10)
             
         plt.tight_layout(h_pad=2)
+        plt.savefig(os.path.join(results_dir, "05_power_and_rolling_mean.png"), dpi=300, bbox_inches='tight', facecolor='white')
         #plt.show()
 
         # Retourner les DataFrames pour chaque compteur
@@ -118,6 +121,7 @@ def run(df):
             ax.tick_params(axis='x', rotation=10)
 
         plt.tight_layout(h_pad=2)
+        plt.savefig(os.path.join(results_dir, "06_coefficient_of_variation.png"), dpi=300, bbox_inches='tight', facecolor='white')
         # plt.show()
 
         return [df[df["meter_id"] == meter_id].copy() for _, meter_id in df_list]
