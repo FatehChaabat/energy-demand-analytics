@@ -1,6 +1,6 @@
-# Analyse avancée de la Consommation Énergétique
+# Analyse et Optimisation de la Consommation Énergétique
 
-Détection d'anomalies via une approche hybride (SQL & Python) et optimisation de la demande énergétique (DSM).
+Pipeline complet d’analyse énergétique combinant **SQL** et **Python** pour la détection d’anomalies, la modélisation thermique et l’optimisation de la demande (DSM).
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue)
 ![Microsoft SQL Server](https://img.shields.io/badge/Microsoft%20SQL%20Server-Developer-red?logo=microsoft-sql-server)
@@ -12,35 +12,35 @@ Détection d'anomalies via une approche hybride (SQL & Python) et optimisation d
 
 - **Détection d’anomalies :** Approche hybride combinant Z-Score et Isolation Forest
 
-- **Modélisation :** Analyse de la corrélation puissance–température (signature thermique)
+- **Modélisation :** Analyse de la corrélation puissance–température via régression linéaire et Random Forest
 
-- **Optimisation :** Réduction des pics via stratégies DSM (Clipping P95, load shifting, load reduction)  
+- **Optimisation :** Réduction des pics de consommation via des stratégies DSM (Clipping , load shifting, load reduction)  
 
 ---
 
 ## 🎯 Objectifs & Valeur Métier
 Le but est de transformer des données brutes de compteurs en leviers décisionnels :
 
-- **Réduction des coûts :** Éviter les pénalités de dépassement de puissance souscrite.
+- **Réduction des coûts :** Éviter les pénalités liées aux dépassements de puissance souscrite
 
-- **Maintenance préventive :** Détecter les dérives de consommation (anomalies) avant la panne.
+- **Maintenance préventive :** Détecter les dérives de consommation (anomalies) avant les défaillances
 
-- **Caractérisation thermique :** Corrélation puissance–température pour isoler la part de consommation liée au climat (chauffage/clim).
+- **Caractérisation thermique :** Analyser la corrélation puissance–température pour isoler la part de consommation liée au climat (chauffage/clim)
 
-- **Modélisation prédictive :** Développement de modèles pour anticiper la demande énergétique (Régression Linéaire, Random Forest).
+- **Modélisation prédictive :** Développer des modèles pour anticiper la demande énergétique (Régression Linéaire, Random Forest)
 
-- **Efficacité énergétique :** Simuler des stratégies DSM (Demand Side Management) pour lisser la courbe de charge.
+- **Efficacité énergétique :** Simuler des stratégies DSM (Demand Side Management) pour lisser la courbe de charge
 
 ---
 
 ## ⚙️ Stack & Données
- - **Données :** 30 jours (résolution horaire) | Compteur 1 (Tertiaire/HVAC) vs Compteur 2 (Industriel/Stable) | Variables (meter_id, timestamp, power_kw).
+ - **Données :** 30 jours (résolution horaire) | Compteur 1 (Tertiaire/HVAC) vs Compteur 2 (Industriel/Stable) | Variables (meter_id, timestamp, power_kw)
 
 - **Architecture :**
 
-  - **SQL Server :** Simulation de données, Nettoyage initial et Agrégations statistiques lourdes.
+  - **SQL Server :** Simulation de données, Nettoyage initial et Agrégations statistiques lourdes
 
-  - **Python :** Nettoyage approfondi, Analyse de séries temporelles, Machine Learning (Scikit-Learn) et Visualisation (Seaborn/Matplotlib).
+  - **Python :** Nettoyage approfondi, Analyse de séries temporelles, Machine Learning (Scikit-Learn) et Visualisation (Seaborn/Matplotlib)
 
 - **Pipeline :** Architecture modulaire orchestrée via `main.py`
 
@@ -51,11 +51,11 @@ Le but est de transformer des données brutes de compteurs en leviers décisionn
 ```mermaid
 flowchart LR
 
-A[<b>🗄️ SQL: Génération & Analyse<b>] --> B[<b>📊 Python: Prétraitement & Séries Temporelles<b>]
+A[<b>🗄️ Génération & Analyse avec SQL<b>] --> B[<b>📊 Prétraitement & Séries Temporelles avec Python<b>]
 B --> C[<b>🚨 Détection Anomalies<b>]
 C --> D[<b>🌡️ Corrélation Puissance/Température<b>]
-D --> E[<b>🤖 ML: Modèles Prédictifs<b>]
-E --> F[<b>⚡ DSM: Optimisation<b>]
+D --> E[<b>🤖 Modèles Prédictifs<b>]
+E --> F[<b>⚡ Optimisation DSM<b>]
 F --> G[<b>📊 Résultats<b>] 
 
 %% Styles
@@ -73,34 +73,77 @@ class G dsm;
 
 ## 📈 Résultats clés
 
-- **Hybridation efficace :** La combinaison Z-Score + Isolation Forest permet une détection d'anomalies robuste sur les deux profils.
+- **Hybridation efficace :** La combinaison Z-Score + Isolation Forest permet une détection d'anomalies robuste sur les deux profils
 
-- **Signature Thermique :** Le profil tertiaire affiche une forte corrélation température/puissance, contrairement au profil industriel.
+- **Signature Thermique :** Le profil tertiaire affiche une forte corrélation température/puissance, contrairement au profil industriel
 
-- **Performance du Random Forest :** Ce modèle surpasse la régression linéaire en capturant les non-linéarités et les dynamiques temporelles.
+- **Performance du Random Forest :** Ce modèle surpasse la régression linéaire en capturant les non-linéarités et les dynamiques temporelles
 
-- **Efficacité du DSM :** Réduction significative des pointes de charge sans altération de la consommation énergétique totale.
+- **Efficacité du DSM :** Réduction significative des pointes de charge sans altération de la consommation énergétique totale
 
 ---
 
 ## 📊 Visualisations
 
-Les figures suivantes illustrent les principaux résultats du pipeline :
+Les figures suivantes illustrent les principaux résultats du pipeline : 
 
-**Séries temporelles :** comparaison des profils horaires de puissance entre les deux compteurs  
-![Power Timeseries](results/01_power_timeseries.png)  
+<p align="center">
+<img src="results/03_heatmap_power.png" width="850">
 
-**Heatmap :** visualisation de la puissance par heure et par jour pour les deux compteurs, mettant en évidence minima, maxima, cycles journaliers et pics via l’intensité des couleurs
-![Heatmap](results/02_heatmap_power.png)  
 
-**Détection d’anomalies :** identification des pics anormaux pour les deux compteurs via méthodes statistiques (Z-score, Z-robuste) et Machine Learning (Isolation Forest)
-![Anomalies](results/03_anomaly_detection.png)  
+<em><b>Heatmap de consommation :</b> On observe clairement une rupture de charge le week-end sur le compteur tertiaire, typique d'une gestion programmée du bâtiment (HVAC), contrairement au profil industriel plus stable.</em>
+</p>
 
-**Corrélation température :** modélisation de la relation température–puissance pour le compteur 1 via régression linéaire et Random Forest (Lag 0 et Lag optimal)
-![Temp Correlation](results/04_temperature_correlation.png)  
+<p align="center">
+<img src="results/07_anomaly_detection.png" width="850">
 
-**Gestion DSM :** consommation énergétique des deux compteurs après application du clipping (P95), du load shifting et de la load reduction
-![DSM](results/05_demand_management.png)   
+
+<em><b>Détection d’anomalies :</b> Identification des pics critiques. L'approche hybride permet d'isoler les dérives ponctuelles tout en ignorant le "bruit" normal de l'activité.</em>
+</p>
+
+<p align="center">
+<img src="results/11_linear_regression_vs_random_forest.png" width="850">
+
+
+<em><b>Signature Thermique :</b> Le modèle <b>Random Forest</b> capte mieux les non-linéarités et l'inertie thermique du système que la régression linéaire classique.</em>
+</p>
+
+<p align="center">
+<img src="results/12_demand_side_management.png" width="850">
+
+
+<em><b>Optimisation DSM :</b> Visualisation de l'écrêtage (Clipping), du déplacement de charge (Shifting) ainsi que la réduction de charge pour lisser la courbe de puissance.</em>
+</p>
+
+---
+
+## 🏭 Applications
+
+- **Monitoring énergétique :** Suivi et analyse des consommations pour bâtiments tertiaires et sites industriels  
+
+- **Gestion des systèmes HVAC :** Optimisation des équipements thermiques en fonction des conditions climatiques 
+
+- **Maintenance conditionnelle :** Détection précoce des dérives de consommation et des comportements anormaux
+
+- **Optimisation de la demande (DSM) :** Réduction des pics de puissance et amélioration du profil de charge 
+
+- **Aide à la décision :** Support au dimensionnement des contrats énergétiques et au pilotage des coûts
+
+---
+
+## 🚀 Améliorations
+
+- **Données réelles :** Intégration de données issues de capteurs ou de systèmes de supervision (SCADA)
+
+- **Prévision avancée :** Mise en place de modèles de séries temporelles pour anticiper la demande énergétique  
+
+- **Temps réel :** Déploiement d’un pipeline de traitement en continu pour le monitoring et la détection d’anomalies en temps réel 
+
+- **Visualisation :** Développement de dashboards interactifs (Power BI) pour le suivi opérationnel
+
+- **Industrialisation :** Conteneurisation du projet (Docker) et automatisation du pipeline (CI/CD) 
+
+- **Enrichissement des données :** Ajout de variables (météo réelle, occupation, calendriers) pour améliorer les modèles 
 
 ---
 
@@ -109,19 +152,19 @@ Les figures suivantes illustrent les principaux résultats du pipeline :
 ```text
 energy-demand-analytics/
 │
-├── README.md
-├── LICENSE
-├── requirements.txt
-├── main.py
+├── README.md                                       # Documentation principale
+├── LICENSE                                         # Licence MIT                          
+├── requirements.txt                                # Dépendances Python nécessaires
+├── main.py                                         # Orchestrateur central du pipeline
 │
-├── data/
+├── data/                                           # Dataset généré
 │   └── energy_readings_month.csv
 │
-├── sql/
+├── sql/                                            # Scripts SQL (Simulation & Analyse)
 │   ├── 01_generate_energy_data.sql
 │   └── 02_energy_analysis.sql
 │
-├── python/
+├── python/                                         # Modules de traitement Python
 │   ├── P1_data_loading_cleaning.py
 │   ├── P2_exploratory_analysis.py
 │   ├── P3_time_series_analysis.py
@@ -131,17 +174,24 @@ energy-demand-analytics/
 │   ├── P7_demand_side_management.py
 │   └── __init__.py
 │
-├── notebooks/
+├── notebooks/                                      # Analyse interactive
 │   └── energy_analysis_pipeline.ipynb
 │
-├── results/
+├── results/                                        # Graphiques exportés
 │   ├── 01_power_timeseries.png
-│   ├── 02_heatmap_power.png
-│   ├── 03_anomaly_detection.png
-│   ├── 04_temperature_correlation.png
-│   └── 05_demand_management.png
+│   ├── 02_power_distribution.png
+│   ├── 03_heatmap_power.png
+│   ├── 04_power_autocorrelation.png
+│   ├── 05_power_and_rolling_mean.png
+│   ├── 06_coefficient_of_variation.png
+│   ├── 07_anomaly_detection.png
+│   ├── 08_energy_instability_index.png
+│   ├── 09_power-temperature_correlation.png
+│   ├── 10_power_vs_temperature_lag.png
+│   ├── 11_linear_regression_vs_random_forest.png
+│   └── 12_demand_side_management.png
 │
-└── .gitignore
+└── .gitignore                                    # Fichiers à exclure du contrôle de version
 ```
 
 ---
@@ -164,21 +214,6 @@ python main.py
 jupyter notebook notebooks/energy_analysis_pipeline.ipynb
 
 ```
-
----
-
-## 🏭 Applications
-- Monitoring énergétique en temps réel
-- Optimisation des systèmes HVAC  
-- Détection précoce de dérives énergétiques
-- Aide à la décision pour gestion DSM
-
----
-
-## 🚀 Améliorations
-- Intégration de données réelles  
-- Développement de modèles de prévision avancés  
-- Dashboards interactifs et suivi énergétique en temps réel  
 
 ---
 
