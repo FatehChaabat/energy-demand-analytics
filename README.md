@@ -90,37 +90,32 @@ class I,J dsm;
 
 ```text
 energy-demand-analytics/
-│
 ├── README.md
 ├── LICENSE
 ├── requirements.txt
-│
+├── main.py
 ├── data/
 │   └── energy_readings_month.csv
-│
 ├── sql/
 │   ├── 01_generate_energy_data.sql
 │   └── 02_energy_analysis.sql
-│
 ├── python/
-│   ├── 01_data_loading_cleaning.py
-│   ├── 02_exploratory_analysis.py
-│   ├── 03_time_series_analysis.py
-│   ├── 04_anomaly_detection.py
-│   ├── 05_temperature_correlation.py
-│   ├── 06_machine_learning_models.py
-│   └── 07_demand_side_management.py
-│
+│   ├── P1_data_loading_cleaning.py
+│   ├── P2_exploratory_analysis.py
+│   ├── P3_time_series_analysis.py
+│   ├── P4_anomaly_detection.py
+│   ├── P5_temperature_correlation.py
+│   ├── P6_machine_learning_models.py
+│   ├── P7_demand_side_management.py
+│   └── __init__.py
 ├── notebooks/
 │   └── energy_analysis_pipeline.ipynb
-│
 ├── results/
 │   ├── 01_power_timeseries.png
 │   ├── 02_heatmap_power.png
 │   ├── 03_anomaly_detection.png
 │   ├── 04_temperature_correlation.png
 │   └── 05_demand_management.png
-│
 └── .gitignore
 ```
 
@@ -137,14 +132,8 @@ cd energy-demand-analytics
 # Installer les dépendances
 pip install -r requirements.txt
 
-# Exécuter les scripts Python dans l’ordre
-python python/01_data_loading_cleaning.py       
-python python/02_exploratory_analysis.py        
-python python/03_time_series_analysis.py        
-python python/04_anomaly_detection.py          
-python python/05_temperature_correlation.py    
-python python/06_machine_learning_models.py     
-python python/07_demand_side_management.py      
+# Exécuter tout le pipeline avec main.py
+python main.py      
 
 # OU ouvrir le notebook interactif
 jupyter notebook notebooks/energy_analysis_pipeline.ipynb
