@@ -90,9 +90,9 @@ def run(df, results_dir):
 
         # --- Tableau récapitulatif ---
         df_anomalies = pd.concat(all_anomalies).sort_values(["meter_id", "method", "timestamp"])
-        print("\n=== Tableau des anomalies par meter_id et méthode ===")
+        print("\nTableau des anomalies par compteur et méthode :")
         for meter_id, df_meter_group in df_anomalies.groupby("meter_id"):
-            print(f"\n--- Meter {meter_id} ---")
+            print(f"\nCompteur {meter_id} : ")
             for method, df_method_group in df_meter_group.groupby("method"):
                 print(f"\nMéthode : {method}")
                 print(df_method_group[["timestamp", "power_kw"]].reset_index(drop=True))

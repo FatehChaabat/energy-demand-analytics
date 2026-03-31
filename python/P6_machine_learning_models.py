@@ -18,6 +18,8 @@ def run(df, results_dir):
         corr_lag0 = corr_lag[0]  
         best_lag = np.argmin(corr_lag)
         best_corr = corr_lag[best_lag]
+
+        print(f"\nCompteur {meter_id} - Regression linéaire vs Random Forest : ")
         
         for i, use_shifted in enumerate([False, True]):
 
@@ -32,6 +34,7 @@ def run(df, results_dir):
             y_pred = coef[0]*x + coef[1]
             mae = mean_absolute_error(y, y_pred)
             rmse = np.sqrt(mean_squared_error(y, y_pred))
+            
 
             title = f"Meter {meter_id} ({f'Lag 0, Corr = {corr_lag0:.2f}' if not use_shifted else f'Optimal Lag = {best_lag}h, Corr = {best_corr:.2f}'})"
 
@@ -47,6 +50,8 @@ def run(df, results_dir):
             if i == 1: ax_lr.xaxis.set_visible(False)
             if i == 1: ax_lr.yaxis.set_visible(False)
             ax_lr.tick_params(axis='y', labelsize=8)
+
+            print(f"\nRegression linéaire ({f'Lag 0, Corr = {corr_lag0:.2f}' if not use_shifted else f'Optimal Lag = {best_lag}h, Corr = {best_corr:.2f}'}) : Coef={coef}, MAE={mae:.2f}, RMSE={rmse:.2f}")
 
             # Random Forest
             X_rf = x.reshape(-1,1)
@@ -69,6 +74,8 @@ def run(df, results_dir):
             if i == 1: ax_rf.yaxis.set_visible(False)
             ax_rf.tick_params(axis='x', labelsize=8)
             ax_rf.tick_params(axis='y', labelsize=8)
+
+            print(f"Random Forest ({f'Lag 0, Corr = {corr_lag0:.2f}' if not use_shifted else f'Optimal Lag = {best_lag}h, Corr = {best_corr:.2f}'}) : MAE={mae_rf:.2f}, RMSE={rmse_rf:.2f}")
 
         plt.tight_layout(h_pad=3, w_pad=2)
         plt.savefig(os.path.join(results_dir, "11_linear_regression_vs_random_forest.png"), dpi=300, bbox_inches='tight', facecolor='white')

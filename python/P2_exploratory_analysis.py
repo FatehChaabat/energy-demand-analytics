@@ -131,23 +131,6 @@ def run(df, results_dir):
             # données Heatmap
             heat = df_type.pivot_table(index="jour", columns="heure", values="power_kw", aggfunc="mean")
             
-            # min et max par jour de la puissance
-            min_points = df_type.loc[df_type.groupby("jour")["power_kw"].idxmin()]
-            max_points = df_type.loc[df_type.groupby("jour")["power_kw"].idxmax()]
-
-            # créer un matrice booléenne de la même taille que heat (False partout au départ)
-            min_matrix = pd.DataFrame(False, index=heat.index, columns=heat.columns)
-            max_matrix = pd.DataFrame(False, index=heat.index, columns=heat.columns)
-            
-            # remplacer les false par des true là où les min et max sont identifiées
-            for _, row in min_points.iterrows():
-                if row["jour"] in heat.index and row["heure"] in heat.columns:
-                    min_matrix.loc[row["jour"], row["heure"]] = True
-
-            for _, row in max_points.iterrows():
-                if row["jour"] in heat.index and row["heure"] in heat.columns:
-                    max_matrix.loc[row["jour"], row["heure"]] = True
-
             # tracer heatmap
             sns.heatmap(heat, cmap='YlOrRd', linewidths=0.5, annot=False, ax=ax)
             ax.set_xlabel("Hour", fontsize=10)
@@ -160,16 +143,6 @@ def run(df, results_dir):
 
             # cacher l'axe X pour le premier subplot
             if i == 0: ax.xaxis.set_visible(False)
-
-            # récuperer toutes les positions où la valeur est True dans les matrices min_matrix et max_matrix
-            jours_min, heures_min = np.where(min_matrix)
-            jours_max, heures_max = np.where(max_matrix)
-            
-            # afficher les points min et max sur ta heatmap (au centre des cases concernées)
-            ax.scatter(heures_min+0.5, jours_min+0.5, color='black', marker='x', s=15, label='min')
-            ax.scatter(heures_max+0.5, jours_max+0.5, color='blue', marker='o', s=15, label='max')
-
-            ax.legend(loc="upper right", fontsize=8)
             
 
         plt.tight_layout(h_pad=2)

@@ -29,7 +29,7 @@ def run():
 
 
     #!  Nettoyage et structuration des données
-    print("Contrôle de qualité des données :")
+    print("\nContrôle de qualité des données :")
 
     # Vérifier des valeurs manquantes (NaN)
     print("Nombre total de valeurs manquantes dans le DataFrame :", df.isna().sum().sum())
@@ -85,7 +85,7 @@ def run():
     df["energy_cum_kwh"] = (df.groupby("meter_id")["energie_kwh"].cumsum())
 
     # Test d'affichage des 2 premières lignes
-    print("Test d'affichage de 2 premières lignes de DataFrame :")
+    print("\nTest d'affichage de 2 premières lignes de DataFrame :")
     print(df.head(2))
 
     return df
