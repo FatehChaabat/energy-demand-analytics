@@ -90,15 +90,19 @@ class I,J dsm;
 
 ```text
 energy-demand-analytics/
+│
 ├── README.md
 ├── LICENSE
 ├── requirements.txt
 ├── main.py
+│
 ├── data/
 │   └── energy_readings_month.csv
+│
 ├── sql/
 │   ├── 01_generate_energy_data.sql
 │   └── 02_energy_analysis.sql
+│
 ├── python/
 │   ├── P1_data_loading_cleaning.py
 │   ├── P2_exploratory_analysis.py
@@ -108,14 +112,17 @@ energy-demand-analytics/
 │   ├── P6_machine_learning_models.py
 │   ├── P7_demand_side_management.py
 │   └── __init__.py
+│
 ├── notebooks/
 │   └── energy_analysis_pipeline.ipynb
+│
 ├── results/
 │   ├── 01_power_timeseries.png
 │   ├── 02_heatmap_power.png
 │   ├── 03_anomaly_detection.png
 │   ├── 04_temperature_correlation.png
 │   └── 05_demand_management.png
+│
 └── .gitignore
 ```
 
