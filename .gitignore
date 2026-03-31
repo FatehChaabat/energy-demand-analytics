@@ -1,20 +1,24 @@
-# Python
+# Fichiers Python compilés
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
-# Jupyter
+# Dossiers Jupyter
 .ipynb_checkpoints/
 
-# Environnement
+# Environnements virtuels
 venv/
-.env
+env/
+*.env
 
-# OS
+# Logs, fichiers temporaires, système
+*.log
 .DS_Store
 Thumbs.db
 
-# Data (à ignorer seulement si le fichier est volumineux)
+# Data (à ignorer seulement si volumineux)
 # data/*.csv
 
-# Résultats (garder ou ignorer selon usage)
+# Résultats (garder ou ignorer si les images sont lourdes ou nombreuses)
 # results/*.png
