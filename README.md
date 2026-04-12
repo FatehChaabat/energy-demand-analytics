@@ -218,7 +218,7 @@ jupyter notebook notebooks/energy_analysis_pipeline.ipynb
 ---
 
 ## 👤 Auteur
-Ingénieur en **mécanique des fluides et systèmes énergétiques**, avec un intérêt pour l’analyse de données, la modélisation et l’optimisation énergétique.
+Ingénieur en **mécanique des fluides et systèmes énergétiques**, avec un intérêt pour l’analyse de données, la modélisation et l’optimisation énergétique. [Fateh Chaabat](https://fatehchaabat.github.io)
 
 ---
 
